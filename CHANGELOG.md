@@ -1,0 +1,31 @@
+# Changelog
+
+All notable changes to the Agentic Development Protocol (ADP) are documented here.
+This project versions the *standard*, not a software package.
+
+## [1.1] — 2026-06-15 (first public release)
+
+First public release of ADP, distilled from a real multi-agent production system
+(~80 deploy rounds, ~200 archived tasks, process-miss log past #65).
+
+### Added (1.1 over the internal 1.0)
+- **PDCA task lifecycle** with an evidence-based Check phase ("verified, not trusted").
+- **Two living logs** — a numbered process-miss log and a positionally-numbered
+  architecture-rules-ratified log — turning every miss into a citable rule.
+- **n-counter rule-promotion threshold** so rules aren't adopted on a single anecdote.
+- **Subsystem hotspot map** (§10.4) for the by-subsystem cross-cut the chronological archives miss.
+- **Codebase-index AST skill** (`scripts/generate_map.py`) plus a four-archetype skill model with progressive disclosure.
+- **Deploy ladder + waiver ledger** (§6.10) and the protocol retrospective outer loop (§6.11).
+- **Optional Claude Code conveniences** — `.claude/hooks/`, `settings.json`, and an
+  optional token-efficient `.adp/*.wire` format (~5.3× compression for agent-to-agent state).
+
+### Repository
+- Reorganized into `current/` (ratified 1.1) and `improvements/` (1.2 candidates).
+- Dual licensing: documentation/spec under **CC BY 4.0**, code/scripts/templates under **MIT**.
+
+### Honest scope
+Validation is still small-n: one production system and one public LLM benchmark.
+The protocol marks what it has falsified and grades its own claims. See
+`improvements/` for the audits.
+
+[1.1]: https://github.com/kikenandez/agentic-development-protocol/releases/tag/v1.1

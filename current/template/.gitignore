@@ -1,0 +1,21 @@
+# ADP recommends ignoring transient editor / OS files
+.DS_Store
+Thumbs.db
+~$*
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Local secrets / env files (project-specific; add yours — ADP §10.5:
+# secrets never enter agent context OR git history)
+.env
+.env.*
+!.env.example
+.envrc
+*.pem
+*.key
+
+# AI-host caches (Claude Code, Cursor, etc.)
+.claude/cache/
+.cursor/cache/

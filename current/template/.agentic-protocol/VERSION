@@ -1,0 +1,14 @@
+ADP 1.1
+Released: 2026-06-06
+Source DNA: a multi-agent production system, ~80 deploy rounds
+Spec: see the agentic-development-protocol repository (current/PROTOCOL.md)
+
+What's in 1.1 vs 1.0:
+- Codebase-index skill (AST skeleton)
+- Four skill archetypes with 3-level progressive disclosure
+- Native Claude Code subagents + hooks + settings
+- Model tiering defaults (Opus/Sonnet/Haiku)
+- Attention-budget framing + two-layer memory
+- Wire-format files (.adp/) — 5.3x compression for agent-to-agent state
+- Dispatch freshness gate
+- scripts/wire-sync.sh

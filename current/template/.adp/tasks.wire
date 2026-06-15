@@ -1,0 +1,4 @@
+; ADP tasks — wire v1.1 (auto-synced from docs/tasks/current.md)
+; T{N} | role | state | prio | plan-ref | inst-ref | acc-summary
+
+T1    | dev | NEW      | P1 | @docs/plans/YYYY-MM-DD-bootstrap.md | inst@@docs/plans/YYYY-MM-DD-bootstrap.md#T1 | see-plan

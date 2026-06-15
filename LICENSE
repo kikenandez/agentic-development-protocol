@@ -1,0 +1,48 @@
+# License
+
+The Agentic Development Protocol (ADP) is open. It is dual-licensed so the
+*standard* can spread freely while the *tooling* stays maximally reusable.
+
+Copyright (c) 2026 Guillermo Blanco.
+
+## Documentation & specification — CC BY 4.0
+
+All prose, specifications, diagrams, and written/visual materials are licensed
+under the **Creative Commons Attribution 4.0 International License (CC BY 4.0)**.
+Full text: `LICENSE-DOCS-CC-BY-4.0.txt` · https://creativecommons.org/licenses/by/4.0/
+
+This covers (non-exhaustively):
+
+- `current/PROTOCOL.md` (the canonical spec) and `current/README.md`
+- all `.md` documentation inside `current/template/docs/` and `current/template/.agentic-protocol/`
+- diagrams and images distributed with the protocol
+
+You may share and adapt these materials, including commercially, **provided you
+give attribution**: "Agentic Development Protocol (ADP) by Guillermo Blanco,
+CC BY 4.0, https://github.com/kikenandez/agentic-development-protocol".
+
+## Code, scripts & templates — MIT
+
+All source code is licensed under the **MIT License**.
+Full text: `LICENSE-CODE-MIT.txt`
+
+This covers (non-exhaustively):
+
+- everything under `current/scripts/` (`init.sh`, `wire-sync.sh`, `adp_metrics.py`, `generate_map.py`)
+- shell hooks under `current/template/.claude/hooks/`
+- CI workflows under `current/template/.github/`
+- config/wire/template files installed into a target repo (`.adp/`, `.claude/settings.json`, etc.)
+
+## Which applies to a given file?
+
+Documentation and specification text → CC BY 4.0. Executable code, scripts,
+hooks, config, and machine-readable templates → MIT. When a file could be read
+either way, the more permissive MIT terms apply to the code portions and CC BY
+4.0 to the prose. If you need certainty for a specific file, open a GitHub Issue.
+
+## Trademarks
+
+"ADP" and "Agentic Development Protocol" name the standard. The licenses above
+grant copyright permissions, **not** trademark rights. Don't use the names to
+imply endorsement or official status (see CC BY 4.0 §2(a)(6)). You may always
+state factually that your work "implements" or "is based on" ADP.

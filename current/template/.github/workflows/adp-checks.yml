@@ -1,0 +1,82 @@
+# adp-checks.yml — ADP server-side enforcement (PROTOCOL.md §6.4, "the second wall")
+#
+# Client-side hooks give the model in-loop feedback but can be edited by the
+# agent they police. These checks run where no agent session can reach.
+# GitLab users: port the three jobs to .gitlab-ci.yml — the shell is identical.
+
+name: ADP checks
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+jobs:
+  commit-lint:
+    name: Conventional-commit lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Lint commit messages (conventional format, ADP §6.1 DO/commit)
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            RANGE="origin/${{ github.base_ref }}..HEAD"
+            git fetch -q origin "${{ github.base_ref }}"
+          else
+            RANGE="${{ github.event.before }}..${{ github.sha }}"
+            # first push to a branch: before is all-zeros
+            case "${{ github.event.before }}" in 0000000*) RANGE="${{ github.sha }} -1" ;; esac
+          fi
+          FAIL=0
+          while IFS= read -r line; do
+            HASH="${line%% *}"; MSG="${line#* }"
+            if ! printf '%s' "$MSG" | grep -Eq '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|process)(\([a-zA-Z0-9_.-]+\))?(!)?: .+'; then
+              echo "::error::Commit $HASH violates conventional format (ADP §6.1): $MSG"
+              FAIL=1
+            fi
+          done < <(git log --no-merges --format='%h %s' $RANGE)
+          exit $FAIL
+
+  wire-drift:
+    name: Wire/prose drift (ADP §9.4)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Regenerate wire files and fail on drift
+        run: |
+          set -euo pipefail
+          # No wire adoption (L1) -> nothing to check
+          [ -d .adp ] && [ -x scripts/wire-sync.sh ] || { echo "wire format not adopted — skipping"; exit 0; }
+          ./scripts/wire-sync.sh
+          # -I '^upd ': wire-sync stamps a regeneration timestamp; only content drift matters
+          if ! git diff --exit-code -I '^upd ' -- .adp/; then
+            echo "::error::.adp/ wire files are stale vs docs/tasks/current.md. A session skipped wire-sync (ADP §9.4). Run scripts/wire-sync.sh and commit the result."
+            exit 1
+          fi
+
+  hook-integrity:
+    name: Hook integrity (ADP §6.4 second wall)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Enforcement changes require an explicit process commit
+        run: |
+          set -euo pipefail
+          git fetch -q origin "${{ github.base_ref }}"
+          CHANGED="$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- .claude/settings.json .claude/hooks/ .github/workflows/adp-checks.yml || true)"
+          [ -z "$CHANGED" ] && exit 0
+          # Allowed only if at least one commit in the PR is process-scoped
+          if git log --no-merges --format='%s' "origin/${{ github.base_ref }}..HEAD" | grep -Eq '^process(\(.+\))?(!)?: '; then
+            echo "enforcement files changed under an explicit 'process:' commit — allowed:"
+            echo "$CHANGED"
+            exit 0
+          fi
+          echo "::error::Enforcement files changed without a 'process:' commit. An agent quietly editing its own hooks is the exact failure this check exists for (ADP §6.4 critical limitation). Re-commit the enforcement change as 'process: <why>'."
+          echo "$CHANGED"
+          exit 1
