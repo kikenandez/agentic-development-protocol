@@ -1,4 +1,4 @@
-# Getting Started — Agentic Development Protocol (ADP) 1.0
+# Getting Started — Agentic Development Protocol (ADP) 1.1
 
 You've installed the protocol. This walkthrough gets you from "files on disk" to "first parallel multi-agent session" in about 15 minutes.
 
@@ -19,7 +19,7 @@ ls -la docs/plans/
 # Expect: _template.md, archive/
 
 cat .agentic-protocol/VERSION
-# Expect: ADP 1.0
+# Expect: ADP 1.1
 ```
 
 If anything's missing, re-run the init script or `cp -r template/. .` from the protocol repo.
@@ -103,7 +103,7 @@ Then write your first task block (T1) below the Dispatch using the template alre
 ```bash
 git add docs/prompts/ docs/tasks/ docs/plans/ .agentic-protocol/
 git status --short    # confirm only ADP files staged
-git commit -m "chore: install Agentic Development Protocol 1.0
+git commit -m "chore: install Agentic Development Protocol 1.1
 
 Adds role prompts, process.md, dispatch-block skeleton, and plan
 template. See .agentic-protocol/VERSION."
