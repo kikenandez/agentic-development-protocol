@@ -22,6 +22,10 @@ retro that found the installer was bash-only (couldn't run on Windows without ba
   (round-trips to an identical file), and `--purge` is a true rollback (removes an
   ADP-created `settings.json` + backups). Un-wire works via `jq` **or** `node`.
 - `uninstall.sh` no longer exits non-zero on a successful run.
+- Install artifacts (`*.adp-bak`, `*.adp-hooks`, `settings.json.pre-uninstall-*`)
+  are now git-ignored so they can't be accidentally committed (Codex init.mjs retro).
+- The `active` enforcement-status note now reminds you to reload/restart the session
+  to *arm* hooks that were merged into a live `settings.json`.
 
 [1.1.2]: https://github.com/kikenandez/agentic-development-protocol/releases/tag/v1.1.2
 

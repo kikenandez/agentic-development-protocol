@@ -19,3 +19,8 @@ Thumbs.db
 # AI-host caches (Claude Code, Cursor, etc.)
 .claude/cache/
 .cursor/cache/
+
+# ADP install/uninstall artifacts (backups + parked references — never commit these)
+*.adp-bak
+*.adp-hooks
+settings.json.pre-uninstall-*
