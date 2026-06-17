@@ -1,7 +1,8 @@
-ADP 1.1
-Released: 2026-06-06
+ADP 1.1.1
+Released: 2026-06-17
 Source DNA: a multi-agent production system, ~80 deploy rounds
 Spec: see the agentic-development-protocol repository (current/PROTOCOL.md)
+Spec version: 1.1 (unchanged — 1.1.1 is an installer/tooling patch)
 
 What's in 1.1 vs 1.0:
 - Codebase-index skill (AST skeleton)
@@ -12,3 +13,17 @@ What's in 1.1 vs 1.0:
 - Wire-format files (.adp/) — 5.3x compression for agent-to-agent state
 - Dispatch freshness gate
 - scripts/wire-sync.sh
+
+What's new in 1.1.1 (installer & tooling — no spec change):
+- init.sh merges hooks into an existing settings.json and appends .gitignore
+  (no more silent SKIP that left enforcement inert)
+- Prerequisite check (jq/bash/python3); --yes / non-TTY; --ci (CI is opt-in);
+  --dry-run / --plan preview; warns before installing onto an uncommitted tree
+- Enforcement-status output states the ACTUAL state (active / inert-no-jq /
+  not-wired / prose-only) instead of a generic checklist
+- Enforcement infra (.claude hooks + settings) ships only with --host=claude-code,
+  so a generic install is truly prose-only
+- INSTALL_MANIFEST written; uninstall.sh (safe / --dry-run / --purge)
+- Cross-platform Node hooks (.mjs — no jq, no bash) + settings.node.json
+- verify-hooks.sh and verify-hooks.mjs offline self-tests
+- PROJECT_NAME centralized to memory/CLAUDE.md (role prompts stay generic)

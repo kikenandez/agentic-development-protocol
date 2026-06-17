@@ -1,8 +1,28 @@
-# Getting Started — Agentic Development Protocol (ADP) 1.1
+# Getting Started — Agentic Development Protocol (ADP) 1.1 (tooling 1.1.1)
 
 You've installed the protocol. This walkthrough gets you from "files on disk" to "first parallel multi-agent session" in about 15 minutes.
 
 If you haven't read `PROTOCOL.md` yet, do that first — this file assumes you understand the five core patterns (stable prompts, Dispatch block, file ownership, commit hygiene, session lifecycle).
+
+---
+
+## Step 0 — How to install cleanly (before you run init.sh)
+
+The installer writes files but **never touches git** — it won't commit or branch
+for you. So install onto a clean tree, ideally a dedicated branch, then review and
+merge:
+
+```bash
+cd /path/to/your/repo
+git checkout -b adopt-adp                 # install on a branch
+/path/to/adp/current/scripts/init.sh --dry-run .   # preview — writes nothing
+/path/to/adp/current/scripts/init.sh --host=claude-code .   # then install for real
+git status && git diff --stat             # review, then commit + merge
+```
+
+`--dry-run` shows exactly what would be added/skipped/merged. If you install onto a
+repo with uncommitted changes, init.sh warns first — heed it, or your work and
+ADP's files end up entangled in the same diff.
 
 ---
 
@@ -19,7 +39,7 @@ ls -la docs/plans/
 # Expect: _template.md, archive/
 
 cat .agentic-protocol/VERSION
-# Expect: ADP 1.1
+# Expect: ADP 1.1.1
 ```
 
 If anything's missing, re-run the init script or `cp -r template/. .` from the protocol repo.

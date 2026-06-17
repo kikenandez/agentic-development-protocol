@@ -17,21 +17,40 @@ what production validated, what it discarded, and why.
 
 | Path | What it is |
 |------|-----------|
-| [`current/`](./current/) | The ratified **ADP 1.1** bundle — spec, scripts, and the template ADP installs into your repo. **Start here.** |
+| [`current/`](./current/) | The ratified **ADP 1.1** bundle (tooling **1.1.1**) — spec, scripts, and the template ADP installs into your repo. **Start here.** |
 | [`current/PROTOCOL.md`](./current/PROTOCOL.md) | The canonical specification. Read this first. |
 | [`current/template/`](./current/template/) | The files ADP installs into a target repository. |
+
+## Prerequisites
+
+- **git** and **bash** — required.
+- **python3** — for `scripts/generate_map.py` and `scripts/adp_metrics.py`.
+- **jq** — required by the default (bash) hooks; without it they silently no-op.
+  (`brew install jq` · `apt install jq` · Windows `winget install jqlang.jq`)
+- **node** — only if you use the cross-platform **Node hooks** (`.mjs`), which need
+  neither jq nor bash. Recommended on Windows.
 
 ## Quick start
 
 ```bash
 git clone https://github.com/kikenandez/agentic-development-protocol.git
 cd agentic-development-protocol/current
-./scripts/init.sh /path/to/your/repo
+
+# Recommended: install on a branch so you can review before merging.
+cd /path/to/your/repo && git checkout -b adopt-adp && cd -
+
+./scripts/init.sh --dry-run /path/to/your/repo          # preview — writes nothing
+./scripts/init.sh --host=claude-code /path/to/your/repo # install with enforcement
+#   omit --host=claude-code for a prose-only install; add --ci for the CI workflow
 ```
 
-Then read `current/template/.agentic-protocol/GETTING_STARTED.md`, fill the
-`<<<PLACEHOLDERS>>>` in `docs/prompts/*.md` (~5 minutes), and start your first
-architect session by pasting `docs/prompts/architect.md` into your AI host.
+The installer is non-destructive (no-clobber + merge), writes an
+`INSTALL_MANIFEST`, reports the actual enforcement status when it finishes, and
+ships an `uninstall.sh`. Then read
+`current/template/.agentic-protocol/GETTING_STARTED.md`, set the project name in
+`memory/CLAUDE.md`, fill the `<<<PLACEHOLDERS>>>` in `docs/prompts/*.md`
+(~5 minutes), and start your first architect session by pasting
+`docs/prompts/architect.md` into your AI host.
 
 The full walkthrough — the five core patterns, adoption levels (L1–L4), and the
 comparison to BMAD / ChatDev / Cursor rules / Anthropic's harness — is in
