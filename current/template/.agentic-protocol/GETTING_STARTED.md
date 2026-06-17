@@ -1,4 +1,4 @@
-# Getting Started — Agentic Development Protocol (ADP) 1.1 (tooling 1.1.3)
+# Getting Started — Agentic Development Protocol (ADP) 1.1 (tooling 1.1.4)
 
 You've installed the protocol. This walkthrough gets you from "files on disk" to "first parallel multi-agent session" in about 15 minutes.
 
@@ -39,7 +39,7 @@ ls -la docs/plans/
 # Expect: _template.md, archive/
 
 cat .agentic-protocol/VERSION
-# Expect: ADP 1.1.3
+# Expect: ADP 1.1.4
 ```
 
 If anything's missing, re-run the init script or `cp -r template/. .` from the protocol repo.
@@ -48,11 +48,20 @@ If anything's missing, re-run the init script or `cp -r template/. .` from the p
 
 ## Step 2 — Fill in your stack (5 minutes)
 
-Each role prompt has `<<<PLACEHOLDER>>>` blocks. Replace them. Do it once; they don't change after.
+The prompts and skills have `<<<PLACEHOLDER>>>` slots. Fill them once; they don't change after.
 
-**First, set the project name once** in `memory/CLAUDE.md`: replace `<<<PROJECT_NAME>>>` with your project name and a one-line description. This is the single place the name lives — every role session reads it on startup, so the role prompts stay generic ("for this repository").
+**Fastest way — fill them all from one file:** edit `adp.answers` (one `KEY=value`
+per line), then run `scripts/adp-fill.sh .` (or `node scripts/adp-fill.mjs .`). It
+substitutes every `<<<KEY>>>` across `docs/` and `memory/CLAUDE.md` and reports
+what's still open — ~10 answers instead of editing a dozen files. Leave the
+ownership-lane keys blank if you'd rather a first architect session propose them.
 
-**Then open and edit the role prompts:**
+The rest of this step is the **manual** equivalent (edit the files directly):
+
+**Set the project name** in `memory/CLAUDE.md` (`<<<PROJECT_NAME>>>`) — the single
+place the name lives; role prompts stay generic ("for this repository").
+
+**Then the role prompts** (or just fill `adp.answers` above):
 
 1. `docs/prompts/architect.md`:
    - `<<<STACK>>>` → e.g. "Python 3.12 + FastAPI + Postgres + React/Vite"
@@ -81,6 +90,31 @@ Each role prompt has `<<<PLACEHOLDER>>>` blocks. Replace them. Do it once; they 
 
 5. `docs/prompts/process.md`:
    - Fill in the File Ownership table (§4) with the same `<<<OWNED_PATHS>>>` values you used in role prompts. Three sources should agree: role prompt, process.md §4, and your team's mental model.
+
+### Ownership lanes — worked examples by topology
+
+The lanes (`OWNED_PATHS` / `DO_NOT_TOUCH`) are the one config decision a human
+should make, not an agent. The template assumes a backend/frontend split; here's
+how to map other layouts:
+
+- **Backend + frontend (the default):** developer owns `api/`, `db/`, `tests/`,
+  `scripts/`; designer owns `web/src/`, `web/public/locales/`, `web/tests/e2e/`.
+  Each is the other's `DO_NOT_TOUCH`.
+- **Single-file apps / monorepo of small things** (e.g. many standalone games or
+  scripts): lanes split *by directory*, not by tier. Developer owns the logic dirs
+  (`game1/`, `game2/`, `shared/`, `scripts/`); if there's no separate UI codebase,
+  drop the designer role and fold visual rules into the developer's `ARCH_RULES`
+  plus a designer-owned `DESIGN.md` *contract* the developer follows. (For a truly
+  single-file app, the whole file is one lane — parallelize by *task*, not by file.)
+- **Library + examples/docs:** developer owns `src/`, `tests/`; a comms/designer
+  role owns `examples/`, `docs/`. Reviewer owns nothing — it only reads.
+- **Service + infra:** developer owns app code + `tests/`; keep `infra/`,
+  `.github/`, `deploy/` in `DO_NOT_TOUCH` and gate them behind the human (or a
+  dedicated ops lane) — never let a feature session touch deploy wiring.
+
+Rule of thumb: a lane is a set of paths **one** session can own without colliding
+with another. If two roles need the same path, that's a handoff task, not a shared
+lane. When in doubt, fewer roles + clear dirs beats more roles + overlapping paths.
 
 **Sanity check:** search the prompts for any remaining `<<<...>>>` placeholders and replace them:
 

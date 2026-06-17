@@ -1,4 +1,4 @@
-ADP 1.1.3
+ADP 1.1.4
 Released: 2026-06-17
 Source DNA: a multi-agent production system, ~80 deploy rounds
 Spec: see the agentic-development-protocol repository (current/PROTOCOL.md)
@@ -44,3 +44,12 @@ What's new in 1.1.3 (initialize helper + polish — no spec change):
 - Versioning policy documented in CHANGELOG (spec = major.minor; tooling = 3rd digit)
 - Install artifacts (*.adp-bak, *.adp-hooks, settings.json.pre-uninstall-*) git-ignored
 - "active" enforcement-status note reminds you to reload the session to arm merged hooks
+
+What's new in 1.1.4 (ergonomics — no spec change):
+- adp.answers + scripts/adp-fill.{sh,mjs}: fill ~40 placeholders from one answers
+  file in a single pass (every <<<KEY>>> now globally unique; lanes namespaced
+  DEV_/DESIGN_); reports what's still open
+- wire-sync.mjs: Node twin of wire-sync.sh (Stop hook now bash-free on Windows)
+- Runtime slots in memory/CLAUDE.md use {{RUNTIME:...}} so `grep '<<<'` flags only
+  install-time placeholders; role-prompt header lines no longer contain <<< tokens
+- Ownership-lane topology examples in GETTING_STARTED (single-file / monorepo / etc.)

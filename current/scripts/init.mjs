@@ -163,7 +163,7 @@ if (fs.existsSync(TPL_GI) && fs.existsSync(GI)) {
 
 // ---- install scripts --------------------------------------------------------
 console.log('\n==> Installing scripts...');
-let scripts = ['generate_map.py', 'wire-sync.sh', 'adp_metrics.py'];
+let scripts = ['generate_map.py', 'wire-sync.sh', 'wire-sync.mjs', 'adp_metrics.py', 'adp-fill.sh', 'adp-fill.mjs'];
 if (isCC) scripts = scripts.concat(['verify-hooks.sh', 'verify-hooks.mjs']);
 for (const s of scripts) {
   const srcS = join(SCRIPT_DIR, s); if (!fs.existsSync(srcS)) continue;

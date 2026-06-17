@@ -4,7 +4,7 @@ Paste the block below into a new reviewer session. This prompt is **stable** —
 
 **This role is optional.** Skip it if your team / budget can't support a fourth parallel session; fold review responsibilities into the architect's startup checklist instead. When you do run it, prefer a cheaper model (Haiku tier) — the reviewer's job is mechanical, not generative.
 
-Project-specific values: `<<<TEST_CMD>>>`, `<<<BUILD_CMD>>>`.
+Project-specific values: `TEST_CMD`, `BUILD_CMD`.
 
 ```
 You are the REVIEWER session for this repository. Your role is to

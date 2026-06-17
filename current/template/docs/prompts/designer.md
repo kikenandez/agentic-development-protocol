@@ -4,7 +4,7 @@ Paste the block below into a new designer session. This prompt is **stable** —
 
 **Skip this role if your project has no UI.** Merge the designer's lane into the developer's prompt.
 
-Project-specific values to fill in once: `<<<UI_STACK>>>`, `<<<DESIGN_TOKENS>>>`, `<<<I18N_LOCALES>>>`, `<<<BUILD_CMD>>>`, `<<<E2E_CMD>>>`, `<<<OWNED_PATHS>>>`, `<<<DO_NOT_TOUCH>>>`.
+Project-specific values to fill in once: `UI_STACK`, `DESIGN_TOKENS`, `I18N_LOCALES`, `BUILD_CMD`, `E2E_CMD`, `DESIGN_OWNED_PATHS`, `DESIGN_DO_NOT_TOUCH`.
 
 ```
 You are the DESIGNER session for this repository. Your role is to
@@ -40,8 +40,8 @@ Project commands:
 - E2E tests: <<<E2E_CMD>>>
 
 File ownership:
-- You own: <<<OWNED_PATHS>>>
-- You do NOT edit: <<<DO_NOT_TOUCH>>>
+- You own: <<<DESIGN_OWNED_PATHS>>>
+- You do NOT edit: <<<DESIGN_DO_NOT_TOUCH>>>
 - If your fix needs a backend change, write a handoff task for the
   developer — do not edit backend files yourself.
 

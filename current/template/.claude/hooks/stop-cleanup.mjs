@@ -39,10 +39,15 @@ try {
     }
   }
 
-  // 2. Wire sync (no-op unless L2/L4 adopted)
-  const wire = join(ROOT, 'scripts', 'wire-sync.sh');
-  if (existsSync(wire) && existsSync(join(ROOT, '.adp'))) {
-    try { execSync(`bash "${wire}"`, { cwd: ROOT, stdio: 'ignore' }); } catch { /* best effort */ }
+  // 2. Wire sync (no-op unless L2/L4 adopted). Prefer the Node twin (no bash);
+  //    fall back to the bash version if only it is present.
+  if (existsSync(join(ROOT, '.adp'))) {
+    const wireMjs = join(ROOT, 'scripts', 'wire-sync.mjs');
+    const wireSh = join(ROOT, 'scripts', 'wire-sync.sh');
+    try {
+      if (existsSync(wireMjs)) execSync(`node "${wireMjs}"`, { cwd: ROOT, stdio: 'ignore' });
+      else if (existsSync(wireSh)) execSync(`bash "${wireSh}"`, { cwd: ROOT, stdio: 'ignore' });
+    } catch { /* best effort */ }
   }
 
   // 3. Release the freshness latch for this session

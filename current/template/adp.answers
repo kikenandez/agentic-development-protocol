@@ -1,0 +1,68 @@
+# ADP answers — fill the values, then run:  scripts/adp-fill.sh .   (or: node scripts/adp-fill.mjs .)
+#
+# One value per line: KEY=value  (everything after the first '=' is the value).
+# Blank lines and lines starting with '#' are ignored. Leave a key blank to skip it
+# (you can fill it later by hand). The fill step substitutes <<<KEY>>> everywhere in
+# docs/ and memory/CLAUDE.md, then reports anything still unfilled.
+#
+# Tip: the ownership lanes (DEV_/DESIGN_OWNED_PATHS, DO_NOT_TOUCH) are a design
+# decision — set them deliberately, or leave blank and let a first architect
+# session (docs/prompts/initialize.md) propose them.
+
+# --- Core (most installs need these) ---------------------------------------
+PROJECT_NAME=
+STACK=
+LOCAL_RUN=
+DEPLOY=
+TEST_CMD=
+ARCH_RULES=
+GLOSSARY=
+
+# --- Developer lane ---------------------------------------------------------
+DEV_OWNED_PATHS=
+DEV_DO_NOT_TOUCH=
+
+# --- Designer lane (delete/skip if no UI) -----------------------------------
+DESIGN_OWNED_PATHS=
+DESIGN_DO_NOT_TOUCH=
+UI_STACK=
+DESIGN_TOKENS=
+I18N_LOCALES=
+BUILD_CMD=
+E2E_CMD=
+COLOR_PRIMARY=
+COLOR_DANGER=
+TYPE_SCALE=
+SPACING_SCALE=
+COMPONENT_DIR=
+COMPONENT_FILE_CONVENTION=
+STATE_CONVENTION=
+
+# --- Operational quick-ref skill --------------------------------------------
+ARCHITECTURE_SUMMARY=
+BACKEND_ENTRY=
+FRONTEND_ENTRY=
+CONFIG_PATHS=
+MIGRATIONS_PATH=
+CI_PATH=
+TEST_ONE_CMD=
+LINT_CMD=
+DEPLOY_CMD=
+GOTCHA_1=
+
+# --- Business / comms / analyst (skip if not using those roles) -------------
+TARGET_USER=
+USER_BRIEF=
+FEEDBACK_LOG_PATH=
+BRAND_CANON_PATH=
+CONTENT_LANES=
+
+# --- Contract-enforcement & design-principles skill detail (optional) -------
+DOMAIN_RULE_1=
+HOW_TO_CHECK_1=
+DOMAIN_RULE_2=
+HOW_TO_CHECK_2=
+DOMAIN_RULE_3=
+HOW_TO_CHECK_3=
+UI_INVARIANT_1=
+WHY_1=

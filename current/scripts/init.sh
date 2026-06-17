@@ -322,7 +322,7 @@ fi
 echo ""
 echo "==> Installing scripts..."
 [ "$DRYRUN" = "1" ] || mkdir -p "$TARGET/scripts"
-SCRIPTS_TO_INSTALL="generate_map.py wire-sync.sh adp_metrics.py"
+SCRIPTS_TO_INSTALL="generate_map.py wire-sync.sh wire-sync.mjs adp_metrics.py adp-fill.sh adp-fill.mjs"
 # Hook self-tests ship only with the enforcement infra.
 [ "$HOST" = "claude-code" ] && SCRIPTS_TO_INSTALL="$SCRIPTS_TO_INSTALL verify-hooks.sh verify-hooks.mjs"
 for s in $SCRIPTS_TO_INSTALL; do

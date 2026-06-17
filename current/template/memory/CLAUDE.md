@@ -10,14 +10,18 @@
 
 ## Pointers (keep ≤5 lines each)
 
-- **Active plan:** docs/plans/<<<ACTIVE_PLAN>>>.md
+- **Active plan:** docs/plans/{{RUNTIME:ACTIVE_PLAN}}.md
 - **Dispatch:** docs/tasks/current.md (wire mirror: .adp/dispatch.wire)
 - **Context budget:** stop at ≤70% utilization (process.md §6)
 - **Role prompts:** docs/prompts/ — referenced, not inlined
 
 ## Current Dispatch summary (≤5 lines, architect-maintained)
 
-<<<DISPATCH_SUMMARY>>>
+{{RUNTIME:DISPATCH_SUMMARY}}
+
+<!-- {{RUNTIME:...}} markers are filled by the architect AT RUNTIME, not at install.
+     They are intentionally NOT `<<<...>>>`, so `grep -r '<<<'` only flags the
+     install-time placeholders you must fill before first use. -->>
 
 ## Standing facts (per-fact detail lives in memory/*.md — write layer)
 
