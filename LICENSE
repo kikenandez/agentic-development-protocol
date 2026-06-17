@@ -1,5 +1,9 @@
 # License
 
+`SPDX-License-Identifier: CC-BY-4.0 AND MIT`
+
+**TL;DR — dual-licensed:** documentation & specification under **CC BY 4.0** (attribution required); code, scripts & templates under **MIT**. GitHub's auto-detector may label the repo "MIT" or "Unknown" because it reports a single license — this file is authoritative.
+
 The Agentic Development Protocol (ADP) is open. It is dual-licensed so the
 *standard* can spread freely while the *tooling* stays maximally reusable.
 
