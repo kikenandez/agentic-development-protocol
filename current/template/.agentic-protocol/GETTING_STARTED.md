@@ -1,4 +1,4 @@
-# Getting Started — Agentic Development Protocol (ADP) 1.1 (tooling 1.1.2)
+# Getting Started — Agentic Development Protocol (ADP) 1.1 (tooling 1.1.3)
 
 You've installed the protocol. This walkthrough gets you from "files on disk" to "first parallel multi-agent session" in about 15 minutes.
 
@@ -39,7 +39,7 @@ ls -la docs/plans/
 # Expect: _template.md, archive/
 
 cat .agentic-protocol/VERSION
-# Expect: ADP 1.1.2
+# Expect: ADP 1.1.3
 ```
 
 If anything's missing, re-run the init script or `cp -r template/. .` from the protocol repo.
@@ -88,6 +88,17 @@ Each role prompt has `<<<PLACEHOLDER>>>` blocks. Replace them. Do it once; they 
 grep -r "<<<" docs/prompts/ memory/CLAUDE.md
 # Expect: empty (or only matches in commented examples)
 ```
+
+---
+
+## Steps 3–4 the easy way — let the architect initialize (recommended)
+
+The fastest way to do the next two steps (first plan + first Dispatch) is the
+one-time **initialize** task: start an architect session (paste
+`docs/prompts/architect.md`), then hand it `docs/prompts/initialize.md` — or, in a
+host with file references, `@docs/prompts/architect.md` + `@docs/prompts/initialize.md`.
+It writes the bootstrap plan, rewrites the Dispatch, and *proposes* the file-ownership
+lanes for your approval. Prefer to do it by hand? The manual steps below do the same.
 
 ---
 

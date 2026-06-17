@@ -86,7 +86,7 @@ do_rm ".claude/settings.node.json"
 do_rm ".claude/HOOKS-cross-platform.md"
 for a in architect developer designer reviewer; do do_rm ".claude/agents/$a.md"; done
 # role prompts (ADP structure — useless without the protocol)
-for p in architect developer designer reviewer analyst business comms process; do do_rm "docs/prompts/$p.md"; done
+for p in architect developer designer reviewer analyst business comms process initialize; do do_rm "docs/prompts/$p.md"; done
 # skills
 for s in codebase-index contract-enforcement design-principles operational-quick-ref; do do_rm "docs/skills/$s"; done
 do_rm "docs/skills/_README.md"

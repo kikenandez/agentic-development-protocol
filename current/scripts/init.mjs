@@ -205,5 +205,6 @@ const msg = {
   notwired: '  Hooks NOT wired — see .claude/settings.json.adp-hooks, or use the Node hooks.',
 }[enf];
 console.log(msg);
-console.log('\nNext: read .agentic-protocol/GETTING_STARTED.md, fill <<<placeholders>>>, run a first architect session.');
+console.log('\nNext: read .agentic-protocol/GETTING_STARTED.md, fill <<<placeholders>>>, then start an');
+console.log('architect session (docs/prompts/architect.md) and hand it docs/prompts/initialize.md.');
 process.exit(0);

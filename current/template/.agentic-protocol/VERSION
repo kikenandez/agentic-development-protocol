@@ -1,4 +1,4 @@
-ADP 1.1.2
+ADP 1.1.3
 Released: 2026-06-17
 Source DNA: a multi-agent production system, ~80 deploy rounds
 Spec: see the agentic-development-protocol repository (current/PROTOCOL.md)
@@ -37,3 +37,10 @@ What's new in 1.1.2 (cross-platform installer — no spec change):
 - uninstall reverses the ADP .gitignore block, and --purge is now a true rollback
   (removes an ADP-created settings.json + backups; un-wire works via jq OR node)
 - generate_map.py warns when an index exceeds ~25k tokens and suggests scoping it
+
+What's new in 1.1.3 (initialize helper + polish — no spec change):
+- docs/prompts/initialize.md: a shipped one-time "first architect session" bootstrap
+  (pair with architect.md to write the first plan + Dispatch, propose ownership lanes)
+- Versioning policy documented in CHANGELOG (spec = major.minor; tooling = 3rd digit)
+- Install artifacts (*.adp-bak, *.adp-hooks, settings.json.pre-uninstall-*) git-ignored
+- "active" enforcement-status note reminds you to reload the session to arm merged hooks
