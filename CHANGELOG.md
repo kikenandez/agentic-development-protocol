@@ -24,6 +24,10 @@ derived from real install tests and retrospectives on Windows + Linux.
 - `.agentic-protocol/INSTALL_MANIFEST` and `scripts/uninstall.sh` (safe / `--dry-run` / `--purge`).
 - **Cross-platform Node hooks** (`.claude/hooks/*.mjs` + `settings.node.json`) that
   need neither `jq` nor `bash` — for Windows and jq-less hosts.
+- **jq-less auto-wiring** — with `--host=claude-code` on a host that has Node but no
+  `jq`, `init.sh` now wires the Node hooks automatically (merging into an existing
+  `settings.json` via node, or switching a fresh one), so enforcement is live with
+  no manual step. The enforcement-status report distinguishes bash vs Node wiring.
 - `scripts/verify-hooks.sh` and `scripts/verify-hooks.mjs` — offline self-tests that
   prove the hook chain without a host restart.
 
