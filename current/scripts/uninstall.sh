@@ -96,7 +96,7 @@ do_rm "docs/retros/_template.md"
 do_rm "docs/tasks/archive/_README.md"
 do_rm "memory/_README.md"
 # protocol scripts + generated indexes (leave uninstall.sh so it can finish)
-for f in generate_map.py wire-sync.sh adp_metrics.py verify-hooks.sh; do do_rm "scripts/$f"; done
+for f in generate_map.py wire-sync.sh adp_metrics.py verify-hooks.sh verify-hooks.mjs; do do_rm "scripts/$f"; done
 do_rm "codebase_index.txt"
 do_rm "codebase_tests_index.txt"
 
