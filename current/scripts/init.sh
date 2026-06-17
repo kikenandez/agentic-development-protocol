@@ -2,9 +2,13 @@
 # init.sh — Install the Agentic Development Protocol into a target repo.
 #
 # Usage:
-#   ./init.sh /path/to/target/repo
+#   ./init.sh /path/to/target/repo     # prose only (no .claude enforcement infra)
 #   ./init.sh                          # uses current directory
-#   ./init.sh --host=claude-code /path # ALSO install .claude/agents/ subagents
+#   ./init.sh --host=claude-code /path # ALSO install .claude/ enforcement infra
+#                                      #   (subagents, hooks .sh+.mjs, settings wiring)
+#   ./init.sh --ci /path               # ALSO install the CI workflow (opt-in; enforces
+#                                      #   conventional commits — off by default)
+#   ./init.sh --yes /path              # non-interactive (also auto when no TTY)
 #   ./init.sh --upgrade /path          # upgrade an existing install (PROTOCOL.md §15)
 #
 # What it does:
@@ -31,12 +35,16 @@ set -euo pipefail
 HOST=""
 UPGRADE=0
 ASSUME_YES=0
+WITH_CI=0
+DRYRUN=0
 ARGS=()
 for a in "$@"; do
   case "$a" in
     --host=*) HOST="${a#--host=}" ;;
     --upgrade) UPGRADE=1 ;;
     --yes|-y) ASSUME_YES=1 ;;   # non-interactive (retro #9) — also auto-on when no TTY
+    --ci) WITH_CI=1 ;;          # opt in to the CI workflow (retro #3) — off by default
+    --dry-run|--plan) DRYRUN=1 ;; # preview every add/skip/merge; write NOTHING (retro02)
     *) ARGS+=("$a") ;;
   esac
 done
@@ -90,7 +98,29 @@ else
 fi
 echo "    From: $TEMPLATE_DIR"
 echo "    Into: $TARGET"
+[ "$DRYRUN" = "1" ] && echo "    MODE: DRY RUN — previewing only, nothing will be written."
 echo ""
+
+# --- Clean-tree check (retro02: install onto uncommitted work entangles diffs) -
+# The installer is git-neutral (writes files, never commits/branches). But if the
+# target has uncommitted changes, the ~39 new files mix into your working tree and
+# settings.json/.gitignore are merged on top of your pending edits. Recommend a
+# clean tree / dedicated branch before mutating.
+if [ "$DRYRUN" != "1" ] && command -v git >/dev/null 2>&1 \
+   && git -C "$TARGET" rev-parse --git-dir >/dev/null 2>&1 \
+   && [ -n "$(git -C "$TARGET" status --porcelain 2>/dev/null)" ]; then
+  echo "  WARN: $TARGET has uncommitted changes."
+  echo "        Installing now mixes ADP's files with your pending work, and"
+  echo "        settings.json/.gitignore are merged in place. Recommended:"
+  echo "          git stash   (or commit)   # clean the tree"
+  echo "          git checkout -b adopt-adp # install on a branch, review, then merge"
+  echo "        Tip: re-run with --dry-run to preview without writing anything."
+  if [ "$ASSUME_YES" != "1" ] && [ -t 0 ]; then
+    read -r -p "  Proceed onto a dirty tree anyway? [y/N] " dirtyok
+    case "$dirtyok" in [yY]|[yY][eE][sS]) ;; *) echo "Aborted."; exit 0 ;; esac
+  fi
+  echo ""
+fi
 
 # Confirm with the user
 # --- Prerequisite check (ADP install-test finding 2 & 3) -------------------
@@ -105,7 +135,10 @@ fi
 echo ""
 
 # Non-interactive when --yes/-y is passed OR stdin isn't a terminal (agent/CI). (retro #9)
-if [ "$ASSUME_YES" = "1" ] || [ ! -t 0 ]; then
+# Dry-run never prompts — it changes nothing.
+if [ "$DRYRUN" = "1" ]; then
+  :
+elif [ "$ASSUME_YES" = "1" ] || [ ! -t 0 ]; then
   echo "Proceeding non-interactively (--yes or non-TTY)."
 else
   read -r -p "Proceed? [y/N] " confirm
@@ -129,32 +162,53 @@ MANIFEST_TMP="$(mktemp)"   # collect added paths for INSTALL_MANIFEST (retro #10
 MERGES_TMP="$(mktemp)"     # collect merge actions performed
 while IFS= read -r -d '' src; do
   rel="${src#./}"
-  # Subagent files are host-specific: only ship with --host=claude-code
+  # Enforcement infra is host-specific: ships ONLY with --host=claude-code, so
+  # "without the flag, only prose ships" (PROTOCOL.md §8.1). This covers the
+  # subagents, both hook implementations (.sh + .mjs), the hook wiring
+  # (settings.json / settings.node.json), and the cross-platform note. (finding #9)
   if [ "$HOST" != "claude-code" ]; then
-    case "$rel" in .claude/agents/*) echo "  SKIP  $rel (use --host=claude-code)"; SKIPPED=$((SKIPPED+1)); continue ;; esac
+    case "$rel" in
+      .claude/agents/*|.claude/hooks/*|.claude/settings.json|.claude/settings.node.json|.claude/HOOKS-cross-platform.md)
+        echo "  SKIP  $rel (enforcement infra — use --host=claude-code)"; SKIPPED=$((SKIPPED+1)); continue ;;
+    esac
+  fi
+  # CI workflow is opt-in: it enforces conventional commits and will fail repos
+  # whose history isn't conventional. Ship only with --ci. (retro #3)
+  if [ "$WITH_CI" != "1" ]; then
+    case "$rel" in
+      .github/workflows/adp-checks.yml)
+        echo "  SKIP  $rel (CI is opt-in — use --ci to install)"; SKIPPED=$((SKIPPED+1)); continue ;;
+    esac
   fi
   dst="$TARGET/$rel"
   if [ -e "$dst" ]; then
     if [ "$UPGRADE" = "1" ] && is_protocol_owned "$rel" && ! cmp -s "$src" "$dst"; then
-      cp -p "$dst" "$dst.adp-bak"
-      cp -p "$src" "$dst"
-      echo "  UPGRADE $rel (old kept as $rel.adp-bak)"
+      if [ "$DRYRUN" = "1" ]; then
+        echo "  WOULD UPGRADE $rel (old kept as $rel.adp-bak)"
+      else
+        cp -p "$dst" "$dst.adp-bak"; cp -p "$src" "$dst"
+        echo "  UPGRADE $rel (old kept as $rel.adp-bak)"
+      fi
       UPGRADED=$((UPGRADED+1))
     else
       echo "  SKIP  $rel (already exists)"
       SKIPPED=$((SKIPPED+1))
     fi
   else
-    mkdir -p "$(dirname "$dst")"
-    cp -p "$src" "$dst"
-    echo "  ADD   $rel"
-    echo "$rel" >> "$MANIFEST_TMP"
+    if [ "$DRYRUN" = "1" ]; then
+      echo "  WOULD ADD  $rel"
+    else
+      mkdir -p "$(dirname "$dst")"; cp -p "$src" "$dst"
+      echo "  ADD   $rel"; echo "$rel" >> "$MANIFEST_TMP"
+    fi
     ADDED=$((ADDED+1))
   fi
 done < <(find . -type f -print0)
 
 echo ""
-if [ "$UPGRADE" = "1" ]; then
+if [ "$DRYRUN" = "1" ]; then
+  echo "==> Plan: would add $ADDED file(s); would skip $SKIPPED already-present file(s)."
+elif [ "$UPGRADE" = "1" ]; then
   echo "==> Done. Added $ADDED; upgraded $UPGRADED (with .adp-bak); left $SKIPPED untouched."
 else
   echo "==> Done. Added $ADDED file(s); skipped $SKIPPED already-present file(s)."
@@ -170,29 +224,37 @@ if [ "$HOST" = "claude-code" ]; then
   if [ -f "$SETTINGS" ] && [ -f "$TEMPLATE_SETTINGS" ]; then
     echo ""
     echo "==> Wiring hooks into existing .claude/settings.json..."
-    if grep -q 'git-hygiene.sh' "$SETTINGS" 2>/dev/null; then
+    if grep -q 'git-hygiene' "$SETTINGS" 2>/dev/null; then
       echo "  OK: settings.json already wires the ADP hooks — nothing to do."
     elif command -v jq >/dev/null 2>&1 && ! grep -q '"hooks"' "$SETTINGS"; then
-      # Safe case: your settings.json has no "hooks" key — inject ADP's, keep all else.
-      tmp="$(mktemp)"
-      if jq --slurpfile adp "$TEMPLATE_SETTINGS" '. + {hooks: $adp[0].hooks}' "$SETTINGS" > "$tmp" 2>/dev/null; then
-        cp -p "$SETTINGS" "$SETTINGS.adp-bak"
-        mv "$tmp" "$SETTINGS"
-        echo "  MERGED ADP hooks into settings.json (your other keys preserved; old kept as settings.json.adp-bak)."
-        echo "merge: .claude/settings.json (hooks key added; backup .adp-bak)" >> "$MERGES_TMP"
+      if [ "$DRYRUN" = "1" ]; then
+        echo "  WOULD MERGE ADP hooks into settings.json (jq present, no existing hooks key; backup .adp-bak)."
       else
-        rm -f "$tmp"
-        cp -p "$TEMPLATE_SETTINGS" "$SETTINGS.adp-hooks"
-        echo "  WARN: jq merge failed. Reference hooks written to settings.json.adp-hooks — merge by hand."
+        # Safe case: your settings.json has no "hooks" key — inject ADP's, keep all else.
+        tmp="$(mktemp)"
+        if jq --slurpfile adp "$TEMPLATE_SETTINGS" '. + {hooks: $adp[0].hooks}' "$SETTINGS" > "$tmp" 2>/dev/null; then
+          cp -p "$SETTINGS" "$SETTINGS.adp-bak"
+          mv "$tmp" "$SETTINGS"
+          echo "  MERGED ADP hooks into settings.json (your other keys preserved; old kept as settings.json.adp-bak)."
+          echo "merge: .claude/settings.json (hooks key added; backup .adp-bak)" >> "$MERGES_TMP"
+        else
+          rm -f "$tmp"
+          cp -p "$TEMPLATE_SETTINGS" "$SETTINGS.adp-hooks"
+          echo "  WARN: jq merge failed. Reference hooks written to settings.json.adp-hooks — merge by hand."
+        fi
       fi
     else
       # Unsafe to auto-merge: no jq, OR a "hooks" key already exists.
-      cp -p "$TEMPLATE_SETTINGS" "$SETTINGS.adp-hooks"
-      echo "  WARN: settings.json was NOT modified (no jq, or it already has a \"hooks\" key)."
-      echo "        The hooks are on disk but INERT until wired in."
-      echo "        Reference block written to: .claude/settings.json.adp-hooks"
-      echo "        Merge its \"hooks\" object into your settings.json, then run the"
-      echo "        deliberate-violation test below to confirm enforcement fires."
+      if [ "$DRYRUN" = "1" ]; then
+        echo "  WOULD WARN: settings.json NOT modified (no jq, or it has a \"hooks\" key); would write settings.json.adp-hooks sidecar."
+      else
+        cp -p "$TEMPLATE_SETTINGS" "$SETTINGS.adp-hooks"
+        echo "  WARN: settings.json was NOT modified (no jq, or it already has a \"hooks\" key)."
+        echo "        The hooks are on disk but INERT until wired in."
+        echo "        Reference block written to: .claude/settings.json.adp-hooks"
+        echo "        Merge its \"hooks\" object into your settings.json, then run the"
+        echo "        deliberate-violation test below to confirm enforcement fires."
+      fi
     fi
   fi
 fi
@@ -214,10 +276,15 @@ if [ -f "$TEMPLATE_GITIGNORE" ] && [ -f "$GITIGNORE" ]; then
     fi
   done < "$TEMPLATE_GITIGNORE"
   if [ "$ADDED_IGN" -gt 0 ]; then
-    { echo ""; echo "# --- added by Agentic Development Protocol ---"; cat "$TMP_IGN"; } >> "$GITIGNORE"
-    echo ""
-    echo "==> .gitignore: appended $ADDED_IGN ADP pattern(s) you didn't already have."
-    echo "merge: .gitignore (appended $ADDED_IGN pattern(s))" >> "$MERGES_TMP"
+    if [ "$DRYRUN" = "1" ]; then
+      echo ""
+      echo "==> .gitignore: WOULD append $ADDED_IGN ADP pattern(s) you don't already have."
+    else
+      { echo ""; echo "# --- added by Agentic Development Protocol ---"; cat "$TMP_IGN"; } >> "$GITIGNORE"
+      echo ""
+      echo "==> .gitignore: appended $ADDED_IGN ADP pattern(s) you didn't already have."
+      echo "merge: .gitignore (appended $ADDED_IGN pattern(s))" >> "$MERGES_TMP"
+    fi
   fi
   rm -f "$TMP_IGN"
 fi
@@ -226,19 +293,37 @@ fi
 # Scripts are protocol-owned: upgraded (with backup) in --upgrade mode.
 echo ""
 echo "==> Installing scripts..."
-mkdir -p "$TARGET/scripts"
-for s in generate_map.py wire-sync.sh adp_metrics.py; do
+[ "$DRYRUN" = "1" ] || mkdir -p "$TARGET/scripts"
+SCRIPTS_TO_INSTALL="generate_map.py wire-sync.sh adp_metrics.py"
+# Hook self-tests ship only with the enforcement infra.
+[ "$HOST" = "claude-code" ] && SCRIPTS_TO_INSTALL="$SCRIPTS_TO_INSTALL verify-hooks.sh verify-hooks.mjs"
+for s in $SCRIPTS_TO_INSTALL; do
   [ -f "$SCRIPT_DIR/$s" ] || continue
   if [ ! -e "$TARGET/scripts/$s" ]; then
-    cp -p "$SCRIPT_DIR/$s" "$TARGET/scripts/$s"
-    echo "  ADD   scripts/$s"
-    echo "scripts/$s" >> "$MANIFEST_TMP"
+    if [ "$DRYRUN" = "1" ]; then
+      echo "  WOULD ADD  scripts/$s"
+    else
+      cp -p "$SCRIPT_DIR/$s" "$TARGET/scripts/$s"
+      echo "  ADD   scripts/$s"
+      echo "scripts/$s" >> "$MANIFEST_TMP"
+    fi
   elif [ "$UPGRADE" = "1" ] && ! cmp -s "$SCRIPT_DIR/$s" "$TARGET/scripts/$s"; then
-    cp -p "$TARGET/scripts/$s" "$TARGET/scripts/$s.adp-bak"
-    cp -p "$SCRIPT_DIR/$s" "$TARGET/scripts/$s"
-    echo "  UPGRADE scripts/$s (old kept as scripts/$s.adp-bak)"
+    if [ "$DRYRUN" = "1" ]; then
+      echo "  WOULD UPGRADE scripts/$s (old kept as scripts/$s.adp-bak)"
+    else
+      cp -p "$TARGET/scripts/$s" "$TARGET/scripts/$s.adp-bak"
+      cp -p "$SCRIPT_DIR/$s" "$TARGET/scripts/$s"
+      echo "  UPGRADE scripts/$s (old kept as scripts/$s.adp-bak)"
+    fi
   fi
 done
+
+if [ "$DRYRUN" = "1" ]; then
+  echo ""
+  echo "==> DRY RUN complete — nothing was written. Re-run without --dry-run to install."
+  rm -f "$MANIFEST_TMP" "$MERGES_TMP"
+  exit 0
+fi
 
 # Hooks must be executable or Claude Code silently skips them
 chmod +x "$TARGET"/.claude/hooks/*.sh 2>/dev/null || true
@@ -278,23 +363,58 @@ if [ "$UPGRADE" = "1" ]; then
   exit 0
 fi
 
+# --- Enforcement status (retro02 #1): state what is ACTUALLY true, not a -------
+# generic checklist. The installer knows the mode, whether hooks are wired, and
+# whether jq is present — so it says so plainly instead of implying enforcement.
+ENF="none"
+if [ "$HOST" = "claude-code" ]; then
+  SET="$TARGET/.claude/settings.json"
+  if [ -f "$SET" ] && grep -q 'git-hygiene' "$SET" 2>/dev/null; then
+    if command -v jq >/dev/null 2>&1; then ENF="active"; else ENF="inert_nojq"; fi
+  else
+    ENF="notwired"
+  fi
+fi
+
+echo ""
+echo "==> ENFORCEMENT STATUS:"
+case "$ENF" in
+  none)
+    echo "  L3 enforcement NOT installed — this is a prose-only install."
+    echo "  The git-hygiene / freshness hooks were not added. To enable enforcement"
+    echo "  later, re-run with --host=claude-code." ;;
+  active)
+    echo "  Hooks WIRED (bash) and jq present. Looks ready."
+    echo "  *** REQUIRED final check *** in a Claude Code session try 'git add -A'"
+    echo "  and confirm it is BLOCKED. Config can be right yet the host not fire it." ;;
+  inert_nojq)
+    echo "  Hooks wired but INERT — jq is NOT installed, so the bash hooks no-op."
+    echo "  Fix it one of two ways, then live-test 'git add -A':"
+    echo "    - install jq, OR"
+    echo "    - use the Node hooks (no jq needed):"
+    echo "        cp .claude/settings.node.json .claude/settings.json" ;;
+  notwired)
+    echo "  Hooks NOT wired — your existing settings.json was preserved and the"
+    echo "  hooks block was not merged (see .claude/settings.json.adp-hooks)."
+    echo "  Merge it, or use the Node hooks (cp .claude/settings.node.json"
+    echo "  .claude/settings.json), then live-test 'git add -A'." ;;
+esac
+
 echo ""
 echo "Next steps:"
 echo "  1. Read $TARGET/.agentic-protocol/GETTING_STARTED.md"
 echo "  2. Fill in <<<PLACEHOLDERS>>> in docs/prompts/*.md and docs/skills/*/SKILL.md"
-echo "     grep -r '<<<' $TARGET/docs/   # to see what needs filling"
+echo "     grep -r '<<<' $TARGET/docs/ $TARGET/memory/CLAUDE.md   # what needs filling"
 echo "  3. Generate the codebase index: python scripts/generate_map.py $TARGET"
-echo "  4. Write your first plan from docs/plans/_template.md"
-echo "  5. Write the first Dispatch block in docs/tasks/current.md"
-echo "  6. *** REQUIRED — the install is NOT done until this passes ***"
-echo "     VERIFY ENFORCEMENT (deliberate-violation test): in a Claude Code"
-echo "     session, try 'git add -A' — confirm the hook BLOCKS it. If it does"
-echo "     not, enforcement is not live (check jq, bash, and settings.json wiring)."
-echo "  7. Start your first architect session by pasting docs/prompts/architect.md"
+echo "  4. Initialize current.md + first plan (run a first architect session —"
+echo "     see .agentic-protocol/GETTING_STARTED.md)."
+echo "  5. Start your first architect session by pasting docs/prompts/architect.md"
 if [ "$HOST" = "claude-code" ]; then
   echo ""
   echo "  Claude Code native: .claude/agents/ installed. Models are PINNED in"
   echo "  frontmatter (§5.3) — review them against current model names."
+  echo "  Self-test the hooks offline: scripts/verify-hooks.sh $TARGET   (bash+jq)"
+  echo "                         or:  node scripts/verify-hooks.mjs $TARGET (no jq)"
 fi
 echo ""
 echo "Whitepaper reference: ../PROTOCOL.md"
