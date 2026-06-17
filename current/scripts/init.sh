@@ -415,10 +415,12 @@ case "$ENF" in
     echo "  later, re-run with --host=claude-code." ;;
   active_bash)
     echo "  Hooks WIRED (bash) and jq present — looks ready."
+    echo "  If you merged hooks into a live session, reload/restart it to ARM them."
     echo "  *** REQUIRED final check *** in a Claude Code session try 'git add -A'"
     echo "  and confirm it is BLOCKED. Config can be right yet the host not fire it." ;;
   active_node)
     echo "  Hooks WIRED (Node) and node present — looks ready, no jq needed."
+    echo "  If you merged hooks into a live session, reload/restart it to ARM them."
     echo "  *** REQUIRED final check *** in a Claude Code session try 'git add -A'"
     echo "  and confirm it is BLOCKED. Config can be right yet the host not fire it." ;;
   inert_nojq)

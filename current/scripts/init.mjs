@@ -199,8 +199,8 @@ if (isCC) {
 console.log('\n==> ENFORCEMENT STATUS:');
 const msg = {
   none: '  Prose-only install — no L3 hooks. Add later with --host=claude-code.',
-  active_node: "  Hooks WIRED (Node) — no jq needed. REQUIRED: in Claude Code try 'git add -A' and confirm it is BLOCKED.",
-  active_bash: "  Hooks WIRED (bash) + jq present. REQUIRED: in Claude Code try 'git add -A' and confirm it is BLOCKED.",
+  active_node: "  Hooks WIRED (Node) — no jq needed. If you merged into a live session, reload/restart it to ARM the hooks. REQUIRED: in Claude Code try 'git add -A' and confirm it is BLOCKED.",
+  active_bash: "  Hooks WIRED (bash) + jq present. If you merged into a live session, reload/restart it to ARM the hooks. REQUIRED: in Claude Code try 'git add -A' and confirm it is BLOCKED.",
   inert_nojq: '  Hooks wired (bash) but INERT — no jq. Use Node hooks: cp .claude/settings.node.json .claude/settings.json',
   notwired: '  Hooks NOT wired — see .claude/settings.json.adp-hooks, or use the Node hooks.',
 }[enf];
