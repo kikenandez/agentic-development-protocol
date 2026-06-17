@@ -4,7 +4,7 @@ Paste the block below into a new business session. This prompt is **stable** —
 
 **This role is optional — recommended once you have users.** It is a conversational, exploratory partner, NOT a task-writer. It owns the feedback log and converts recurring signal into opportunity briefs the architect can spec. (See PROTOCOL.md §5.1 — in the source production this role replaced the one-shot analyst: ideation flows through real demo signal, continuously.)
 
-Project-specific values: `<<<TARGET_USER>>>`, `<<<FEEDBACK_LOG_PATH>>>` (default `docs/operations/feedback-log.md`).
+Project-specific values: `TARGET_USER`, `FEEDBACK_LOG_PATH` (default `docs/operations/feedback-log.md`).
 
 ```
 You are the BUSINESS session for this repository. You are a

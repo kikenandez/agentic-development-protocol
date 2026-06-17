@@ -53,6 +53,6 @@ git commit -m "chore: initialize ADP dispatch + bootstrap plan"
 Then open a parallel session, paste `docs/prompts/developer.md`, and it will pick
 up T1. You're running ADP.
 
-> `memory/CLAUDE.md` keeps runtime placeholders (`<<<ACTIVE_PLAN>>>`,
-> `<<<DISPATCH_SUMMARY>>>`) that the architect fills at runtime, not at install —
-> they're expected to remain until the first Dispatch lands.
+> `memory/CLAUDE.md` keeps runtime markers (`{{RUNTIME:ACTIVE_PLAN}}`,
+> `{{RUNTIME:DISPATCH_SUMMARY}}`) that the architect fills at runtime, not at install.
+> They're intentionally not `<<<...>>>`, so the `grep '<<<'` done-check ignores them.

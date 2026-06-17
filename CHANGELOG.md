@@ -19,6 +19,29 @@ Rule of thumb: if it changes `PROTOCOL.md`, it's a minor (1.2). If it changes th
 installer/template/docs, it's a patch (1.1.x). Pure doc tweaks can ride along
 without their own bump.
 
+## [1.1.4] — 2026-06-17 (configuration ergonomics)
+
+Patch release. **The 1.1 spec is unchanged.** Closes the remaining backlog ergonomics.
+
+### Added
+- **`adp.answers` + `scripts/adp-fill.{sh,mjs}`** — fill the ~40 `<<<placeholders>>>`
+  from one `KEY=value` file in a single pass (Node or bash), instead of editing a
+  dozen files by hand. Reports what's still open. Every placeholder is now globally
+  unique (ownership lanes namespaced `DEV_*` / `DESIGN_*`), which is what makes a
+  flat answers file possible.
+- **`scripts/wire-sync.mjs`** — Node twin of `wire-sync.sh`, so the Stop hook runs
+  with no bash (byte-identical output). The toolchain is now fully cross-platform.
+- **Ownership-lane topology examples** in `GETTING_STARTED.md` (single-file apps,
+  monorepo-of-small-things, library+examples, service+infra).
+
+### Changed
+- Runtime slots in `memory/CLAUDE.md` use a distinct `{{RUNTIME:...}}` marker, so
+  `grep -r '<<<'` flags only the install-time placeholders you must fill. Role-prompt
+  header lines no longer contain `<<<...>>>` tokens (cleaner done-check; `--fill`
+  won't touch them).
+
+[1.1.4]: https://github.com/kikenandez/agentic-development-protocol/releases/tag/v1.1.4
+
 ## [1.1.3] — 2026-06-17 (initialize helper + polish)
 
 Patch release. **The 1.1 spec is unchanged.**

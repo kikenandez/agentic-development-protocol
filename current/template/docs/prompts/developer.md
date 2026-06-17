@@ -2,7 +2,7 @@
 
 Paste the block below into a new developer session. This prompt is **stable** — do not edit it per round. Current priorities and in-flight tasks live in `docs/tasks/current.md` (the Dispatch block), not here.
 
-Project-specific values to fill in once, on install: `<<<STACK>>>`, `<<<LOCAL_RUN>>>`, `<<<DEPLOY>>>`, `<<<TEST_CMD>>>`, `<<<OWNED_PATHS>>>`, `<<<DO_NOT_TOUCH>>>`, `<<<ARCH_RULES>>>`.
+Project-specific values to fill in once, on install: `STACK`, `LOCAL_RUN`, `DEPLOY`, `TEST_CMD`, `DEV_OWNED_PATHS`, `DEV_DO_NOT_TOUCH`, `ARCH_RULES`.
 
 ```
 You are the DEVELOPER session for this repository. Your role is to
@@ -32,8 +32,8 @@ Key architecture rules (timeless — memorise these):
 <<<ARCH_RULES>>>
 
 File ownership:
-- You own: <<<OWNED_PATHS>>>
-- You do NOT edit: <<<DO_NOT_TOUCH>>>
+- You own: <<<DEV_OWNED_PATHS>>>
+- You do NOT edit: <<<DEV_DO_NOT_TOUCH>>>
 - If your fix needs a change outside your lane, write a handoff task —
   do not edit other-lane files yourself.
 

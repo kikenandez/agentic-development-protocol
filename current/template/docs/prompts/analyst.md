@@ -2,7 +2,7 @@
 
 Paste the block below for the **first** session of a greenfield project. Use it exactly once: to convert a vague brief into 3-5 plan documents the architect can pick up. After kickoff, delete this file or move it to `docs/prompts/archive/` — keeping it around invites scope creep.
 
-Project-specific values: `<<<USER_BRIEF>>>`.
+Project-specific values: `USER_BRIEF`.
 
 ```
 You are the ANALYST session for this repository. Your role is

@@ -175,7 +175,7 @@ Sessions can run in parallel. To avoid file conflicts:
 | **Reviewer** | Nothing writable except the Result block of REVIEW tasks |
 | **Rule** | If two sessions need the same file, coordinate via the architect with a handoff task. Do not edit files outside your lane. |
 
-Fill the developer/designer rows in this table when you install the protocol. Each role prompt also declares its `<<<OWNED_PATHS>>>` and `<<<DO_NOT_TOUCH>>>` — keep the three sources consistent.
+Fill the developer/designer rows in this table when you install the protocol. Each role prompt also declares its `<<<DEV_OWNED_PATHS>>>`/`<<<DESIGN_OWNED_PATHS>>>` (and the matching DO_NOT_TOUCH) — keep the three sources consistent.
 
 ---
 

@@ -54,7 +54,8 @@ for (const p of ['architect', 'developer', 'designer', 'reviewer', 'analyst', 'b
 for (const s of ['codebase-index', 'contract-enforcement', 'design-principles', 'operational-quick-ref']) rm(`docs/skills/${s}`);
 rm('docs/skills/_README.md'); rm('docs/plans/_template.md'); rm('docs/retros/_template.md');
 rm('docs/tasks/archive/_README.md'); rm('memory/_README.md');
-for (const s of ['generate_map.py', 'wire-sync.sh', 'adp_metrics.py', 'verify-hooks.sh', 'verify-hooks.mjs']) rm(`scripts/${s}`);
+for (const s of ['generate_map.py', 'wire-sync.sh', 'wire-sync.mjs', 'adp_metrics.py', 'verify-hooks.sh', 'verify-hooks.mjs', 'adp-fill.sh', 'adp-fill.mjs']) rm(`scripts/${s}`);
+rm('adp.answers');
 rm('codebase_index.txt'); rm('codebase_tests_index.txt');
 
 // 2) authored content (purge only)
