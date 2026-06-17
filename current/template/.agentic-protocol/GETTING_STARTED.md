@@ -159,6 +159,53 @@ Now you have two sessions running. Watch them for the first task — confirm the
 
 ---
 
+## Teams, multiple computers & agentic sessions
+
+**Install once per repo — not per computer.** ADP's files are git-tracked, so one
+person runs `init.sh`, fills the placeholders, and commits. Everyone else gets the
+whole protocol — prompts, Dispatch, hooks, settings — by `git clone` / `git pull`.
+There is no second install.
+
+**Per-developer "satellite" setup (no install, ~1 minute).** After cloning, each dev:
+
+1. Ensures prerequisites are present: `bash` + `jq` (for the bash hooks) **or** just
+   `node` (for the Node hooks). See Prerequisites in the repo README.
+2. Confirms enforcement fires *on their machine*:
+   `scripts/verify-hooks.sh .` (or `node scripts/verify-hooks.mjs .`), then a live
+   `git add -A` in the AI host — it must be blocked. Hooks are evaluated locally, so
+   a teammate missing the runtime gets no enforcement until they install it.
+3. Optionally uses `.claude/settings.local.json` (per-user, gitignored) for personal
+   overrides. The committed `settings.json` holds the **team** hook wiring — leave it.
+
+**Mixed-OS teams → standardize on the Node hooks.** A committed `settings.json` can
+point at only one flavor. The Node hooks (`.mjs`) run on macOS/Linux/Windows with
+just `node`, so commit the Node wiring once
+(`cp .claude/settings.node.json .claude/settings.json` before committing) and every
+teammate is covered regardless of OS.
+
+**Two operating models — pick deliberately:**
+
+- **Centralized (best for heavy parallel agentic work).** All the parallel sessions
+  (architect + developers + designer) run in **one** environment against **one**
+  working tree — a dedicated box or shared cloud workspace. This is what ADP was
+  built for: the git-hygiene hook and file-ownership lanes exist to keep parallel
+  sessions on a *shared* `.git/index` from colliding. Humans connect to orchestrate.
+- **Distributed.** Each developer runs their own session(s) on their own clone and
+  collaborates via normal git (branches + PRs). Still valuable, but the hooks become
+  a per-machine safety net rather than the coordination layer.
+
+**What gets fragile across many computers:** the single-file shared state. The
+**Dispatch** (`docs/tasks/current.md`) assumes **one owner at a time** — two
+architects rewriting it on two machines will merge-conflict. And the regenerating
+`.adp/*.wire` files churn per machine; if that's noisy for your team, have one
+machine own them or git-ignore the live `.adp/` state. Cross-machine code collisions
+are just ordinary git — file-ownership lanes reduce them, branches/PRs resolve them.
+
+**Rule of thumb:** one committed install + a single Dispatch owner + Node hooks for a
+mixed team. For serious parallel multi-agent runs, give it a dedicated working tree.
+
+---
+
 ## What success looks like at week 1
 
 - `docs/tasks/current.md` Dispatch block has been rewritten 5+ times
