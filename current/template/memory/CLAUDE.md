@@ -4,6 +4,10 @@
      every compaction — every line here is paid for repeatedly. Reference,
      never inline. The architect curates; prune on every retro. -->
 
+## Project (identity — every role reads this on startup)
+
+<<<PROJECT_NAME>>> — one-line description of what this repository is.
+
 ## Pointers (keep ≤5 lines each)
 
 - **Active plan:** docs/plans/<<<ACTIVE_PLAN>>>.md
