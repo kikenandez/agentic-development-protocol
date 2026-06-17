@@ -36,6 +36,7 @@ SKIP_DIRS = {
 
 PROD_OUT = "codebase_index.txt"
 TEST_OUT = "codebase_tests_index.txt"
+INDEX_TOKEN_WARN = 25_000  # warn if an index exceeds this (~100 KB) — Codex install-retro
 
 
 def is_test_path(rel: Path) -> bool:
@@ -174,7 +175,18 @@ def main() -> int:
     if not quiet:
         for out, items in ((PROD_OUT, prod), (TEST_OUT, tests)):
             size = (root / out).stat().st_size
-            print(f"wrote {out}: {len(items)} modules, ~{size // 4:,} tokens")
+            tokens = size // 4
+            print(f"wrote {out}: {len(items)} modules, ~{tokens:,} tokens")
+            # Codex install-retro: the index can blow past the "low-token" promise
+            # on artifact-heavy repos. Warn + suggest scoping it.
+            if tokens > INDEX_TOKEN_WARN:
+                print(
+                    f"  WARN: {out} is ~{tokens:,} tokens (> {INDEX_TOKEN_WARN:,}). "
+                    "That undercuts the low-token promise — exclude benchmark/"
+                    "generated/vendored dirs, or index a subtree: "
+                    f"python scripts/generate_map.py <subdir>",
+                    file=sys.stderr,
+                )
     return 0
 
 

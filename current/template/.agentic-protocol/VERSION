@@ -1,8 +1,8 @@
-ADP 1.1.1
+ADP 1.1.2
 Released: 2026-06-17
 Source DNA: a multi-agent production system, ~80 deploy rounds
 Spec: see the agentic-development-protocol repository (current/PROTOCOL.md)
-Spec version: 1.1 (unchanged — 1.1.1 is an installer/tooling patch)
+Spec version: 1.1 (unchanged — 1.1.x is the installer/tooling patch line)
 
 What's in 1.1 vs 1.0:
 - Codebase-index skill (AST skeleton)
@@ -29,3 +29,11 @@ What's new in 1.1.1 (installer & tooling — no spec change):
   init.sh now wires the Node hooks automatically (live enforcement, no manual step)
 - verify-hooks.sh and verify-hooks.mjs offline self-tests
 - PROJECT_NAME centralized to memory/CLAUDE.md (role prompts stay generic)
+
+What's new in 1.1.2 (cross-platform installer — no spec change):
+- Cross-platform Node installer: scripts/init.mjs + scripts/uninstall.mjs run with
+  only node (no bash, no jq) — for Windows and other bash-less hosts (Codex retro).
+  init.sh stays the canonical Unix installer.
+- uninstall reverses the ADP .gitignore block, and --purge is now a true rollback
+  (removes an ADP-created settings.json + backups; un-wire works via jq OR node)
+- generate_map.py warns when an index exceeds ~25k tokens and suggests scoping it

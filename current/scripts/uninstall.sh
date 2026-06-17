@@ -116,33 +116,67 @@ if [ "$PURGE" = "1" ]; then
 fi
 
 # --- 3) Un-wire settings.json (never delete it) -------------------------------
+# Handles both bash (.sh) and Node (.mjs) wiring; uses jq if present, else node.
 echo ""
 echo "==> Un-wiring hooks from .claude/settings.json..."
 SETTINGS="$TARGET/.claude/settings.json"
-if [ -f "$SETTINGS" ] && grep -q 'git-hygiene.sh' "$SETTINGS"; then
+if [ -f "$SETTINGS" ] && grep -q 'git-hygiene' "$SETTINGS"; then
   if [ "$DRYRUN" = "1" ]; then
     echo "  WOULD remove the ADP \"hooks\" block (your other settings preserved)."
   elif command -v jq >/dev/null 2>&1; then
     cp -p "$SETTINGS" "$SETTINGS.pre-uninstall-$(date +%Y%m%d%H%M%S)"
     tmp="$(mktemp)"
-    if jq 'del(.hooks)' "$SETTINGS" > "$tmp" 2>/dev/null; then
-      mv "$tmp" "$SETTINGS"
-      echo "  UN-WIRED hooks (backup written as settings.json.pre-uninstall-*)."
-    else
-      rm -f "$tmp"; echo "  WARN: jq failed — remove the \"hooks\" block from settings.json by hand."
-    fi
+    if jq 'del(.hooks)' "$SETTINGS" > "$tmp" 2>/dev/null; then mv "$tmp" "$SETTINGS"
+      echo "  UN-WIRED hooks via jq (backup settings.json.pre-uninstall-*)."
+    else rm -f "$tmp"; echo "  WARN: jq failed — remove the \"hooks\" block by hand."; fi
+  elif command -v node >/dev/null 2>&1; then
+    cp -p "$SETTINGS" "$SETTINGS.pre-uninstall-$(date +%Y%m%d%H%M%S)"
+    tmp="$(mktemp)"
+    if node -e 'const fs=require("fs");const[,a]=process.argv;const c=JSON.parse(fs.readFileSync(a,"utf8"));delete c.hooks;process.stdout.write(JSON.stringify(c,null,2)+"\n")' "$SETTINGS" > "$tmp" 2>/dev/null && [ -s "$tmp" ]; then
+      mv "$tmp" "$SETTINGS"; echo "  UN-WIRED hooks via node (backup settings.json.pre-uninstall-*)."
+    else rm -f "$tmp"; echo "  WARN: node failed — remove the \"hooks\" block by hand."; fi
   else
-    echo "  WARN: jq not found — remove the ADP \"hooks\" block from settings.json by hand"
-    echo "        (look for the four .claude/hooks/*.sh entries)."
+    echo "  WARN: no jq and no node — remove the ADP \"hooks\" block from settings.json by hand."
   fi
 else
   echo "  No ADP hooks wired in settings.json — nothing to un-wire."
 fi
 
+# --- 3b) Reverse the ADP .gitignore block (Codex install-retro) ---------------
+# init.sh appends an "added by Agentic Development Protocol" marker block; remove
+# it (and trailing blanks) so a test install reverts to an exact .gitignore.
+GITIGNORE="$TARGET/.gitignore"
+if [ -f "$GITIGNORE" ] && grep -qF 'added by Agentic Development Protocol' "$GITIGNORE"; then
+  if [ "$DRYRUN" = "1" ]; then
+    echo "  WOULD remove the ADP block from .gitignore."
+  else
+    tmp="$(mktemp)"
+    awk '
+      /# --- added by Agentic Development Protocol ---/ { stop=1 }
+      stop { next }
+      { lines[NR]=$0 }
+      END { last=0; for(i=1;i<=NR;i++) if(lines[i] !~ /^[[:space:]]*$/) last=i;
+            for(i=1;i<=last;i++) print lines[i] }
+    ' "$GITIGNORE" > "$tmp" && mv "$tmp" "$GITIGNORE"
+    echo "  REVERSED the ADP block in .gitignore (your patterns kept)."
+  fi
+fi
+
+# --- 3c) PURGE-only: remove an ADP-CREATED settings.json + backups (true rollback)
+# If settings.json has no .adp-bak, ADP created it fresh (didn't merge into yours);
+# after un-wiring it's just "{}", so a full rollback should remove it.
+if [ "$PURGE" = "1" ] && [ "$DRYRUN" != "1" ]; then
+  if [ -f "$SETTINGS" ] && [ ! -f "$SETTINGS.adp-bak" ] \
+     && [ "$(tr -d '[:space:]' < "$SETTINGS" 2>/dev/null)" = "{}" ]; then
+    do_rm ".claude/settings.json"
+  fi
+  rm -f "$TARGET"/.claude/settings.json.pre-uninstall-* "$TARGET"/.claude/settings.json.adp-hooks 2>/dev/null || true
+fi
+
 # --- 4) Tidy now-empty ADP dirs (never force-removes dirs with your files) -----
 echo ""
 echo "==> Tidying empty directories..."
-for d in .claude/hooks .claude/agents docs/prompts docs/skills docs/tasks/archive docs/tasks docs/plans docs/retros; do
+for d in .claude/hooks .claude/agents .claude docs/prompts docs/skills docs/tasks/archive docs/tasks docs/plans docs/retros; do
   rmdir_if_empty "$d"
 done
 
@@ -161,7 +195,9 @@ else
 fi
 echo ""
 echo "Notes:"
-echo "  - .gitignore was left as-is (ADP's secret/cache patterns are harmless; trim by hand if you want)."
+echo "  - The ADP .gitignore block was reversed (your own patterns kept)."
 echo "  - Everything was tracked in git: review with 'git status', then commit the removal —"
 echo "    or undo the whole thing with 'git restore .' / 'git checkout -- .'."
 [ "$DRYRUN" = "1" ] && echo "  - DRY RUN: nothing was actually changed."
+
+exit 0   # never let the final test's exit status leak as a failure
