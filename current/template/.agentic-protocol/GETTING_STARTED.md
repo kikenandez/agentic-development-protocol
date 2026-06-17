@@ -30,24 +30,24 @@ If anything's missing, re-run the init script or `cp -r template/. .` from the p
 
 Each role prompt has `<<<PLACEHOLDER>>>` blocks. Replace them. Do it once; they don't change after.
 
-**Open and edit:**
+**First, set the project name once** in `memory/CLAUDE.md`: replace `<<<PROJECT_NAME>>>` with your project name and a one-line description. This is the single place the name lives — every role session reads it on startup, so the role prompts stay generic ("for this repository").
+
+**Then open and edit the role prompts:**
 
 1. `docs/prompts/architect.md`:
-   - `<<<PROJECT_NAME>>>` → your project name
    - `<<<STACK>>>` → e.g. "Python 3.12 + FastAPI + Postgres + React/Vite"
    - `<<<LOCAL_RUN>>>` → e.g. "`docker compose up`" or "`./run_local.sh`"
    - `<<<DEPLOY>>>` → e.g. "`./scripts/deploy.sh`" or "GitHub Actions on push to main"
    - `<<<GLOSSARY>>>` → internal acronyms / project codenames a fresh session should know
 
 2. `docs/prompts/developer.md`:
-   - Same `<<<PROJECT_NAME>>>` / `<<<STACK>>>` / `<<<LOCAL_RUN>>>` / `<<<DEPLOY>>>`
+   - Same `<<<STACK>>>` / `<<<LOCAL_RUN>>>` / `<<<DEPLOY>>>`
    - `<<<TEST_CMD>>>` → e.g. "`pytest tests/ -q`"
    - `<<<OWNED_PATHS>>>` → e.g. "`api/`, `db/`, `tests/`, `scripts/`"
    - `<<<DO_NOT_TOUCH>>>` → e.g. "`web/`, `docs/`"
    - `<<<ARCH_RULES>>>` → 3-7 timeless rules specific to your codebase (database access pattern, auth pattern, secrets handling)
 
 3. `docs/prompts/designer.md` (or delete if no UI):
-   - Same `<<<PROJECT_NAME>>>`
    - `<<<UI_STACK>>>` → e.g. "React + TypeScript + Tailwind, Vite"
    - `<<<DESIGN_TOKENS>>>` → font + color + spacing tokens
    - `<<<I18N_LOCALES>>>` → e.g. "en, fr, es" or "en only — no i18n yet"
@@ -57,7 +57,7 @@ Each role prompt has `<<<PLACEHOLDER>>>` blocks. Replace them. Do it once; they 
    - `<<<DO_NOT_TOUCH>>>` → e.g. "`api/`, `db/`, `scripts/`"
 
 4. `docs/prompts/reviewer.md` (optional):
-   - `<<<PROJECT_NAME>>>`, `<<<TEST_CMD>>>`, `<<<BUILD_CMD>>>`
+   - `<<<TEST_CMD>>>`, `<<<BUILD_CMD>>>`
 
 5. `docs/prompts/process.md`:
    - Fill in the File Ownership table (§4) with the same `<<<OWNED_PATHS>>>` values you used in role prompts. Three sources should agree: role prompt, process.md §4, and your team's mental model.
@@ -65,7 +65,7 @@ Each role prompt has `<<<PLACEHOLDER>>>` blocks. Replace them. Do it once; they 
 **Sanity check:** search the prompts for any remaining `<<<...>>>` placeholders and replace them:
 
 ```bash
-grep -r "<<<" docs/prompts/
+grep -r "<<<" docs/prompts/ memory/CLAUDE.md
 # Expect: empty (or only matches in commented examples)
 ```
 
