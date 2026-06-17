@@ -3,6 +3,36 @@
 All notable changes to the Agentic Development Protocol (ADP) are documented here.
 This project versions the *standard*, not a software package.
 
+## [1.1.1] — 2026-06-17 (installer & tooling hardening)
+
+Patch release. **The 1.1 spec is unchanged** — these are installer/tooling fixes,
+derived from real install tests and retrospectives on Windows + Linux.
+
+### Fixed
+- **Silent-inert enforcement** — `init.sh` now *merges* the hooks into an existing
+  `.claude/settings.json` (and appends missing `.gitignore` lines) instead of a
+  silent `SKIP` that left the hooks on disk but never wired.
+- **Generic install was not prose-only** — all `.claude/` enforcement infra (hooks,
+  `settings.json`, `settings.node.json`) now ships only with `--host=claude-code`.
+- **Over-confident output** — the installer now reports the *actual* enforcement
+  status (active / inert-no-jq / not-wired / prose-only), not a generic checklist.
+
+### Added
+- `--dry-run` / `--plan` (preview, write nothing); `--yes` / non-TTY; `--ci` (CI
+  workflow is now opt-in); prerequisite check (jq/bash/python3); a warning before
+  installing onto a repo with uncommitted changes.
+- `.agentic-protocol/INSTALL_MANIFEST` and `scripts/uninstall.sh` (safe / `--dry-run` / `--purge`).
+- **Cross-platform Node hooks** (`.claude/hooks/*.mjs` + `settings.node.json`) that
+  need neither `jq` nor `bash` — for Windows and jq-less hosts.
+- `scripts/verify-hooks.sh` and `scripts/verify-hooks.mjs` — offline self-tests that
+  prove the hook chain without a host restart.
+
+### Changed
+- `PROJECT_NAME` is set once in `memory/CLAUDE.md`; role prompts are now generic
+  ("this repository").
+
+[1.1.1]: https://github.com/kikenandez/agentic-development-protocol/releases/tag/v1.1.1
+
 ## [1.1] — 2026-06-15 (first public release)
 
 First public release of ADP, distilled from a real multi-agent production system
