@@ -50,7 +50,7 @@ rm('.adp'); rm('.agentic-protocol'); rm('.github/workflows/adp-checks.yml');
 for (const h of ['git-hygiene', 'dispatch-freshness', 'post-commit-orphan-check', 'stop-cleanup']) { rm(`.claude/hooks/${h}.sh`); rm(`.claude/hooks/${h}.mjs`); }
 rm('.claude/settings.node.json'); rm('.claude/HOOKS-cross-platform.md');
 for (const a of ['architect', 'developer', 'designer', 'reviewer']) rm(`.claude/agents/${a}.md`);
-for (const p of ['architect', 'developer', 'designer', 'reviewer', 'analyst', 'business', 'comms', 'process']) rm(`docs/prompts/${p}.md`);
+for (const p of ['architect', 'developer', 'designer', 'reviewer', 'analyst', 'business', 'comms', 'process', 'initialize']) rm(`docs/prompts/${p}.md`);
 for (const s of ['codebase-index', 'contract-enforcement', 'design-principles', 'operational-quick-ref']) rm(`docs/skills/${s}`);
 rm('docs/skills/_README.md'); rm('docs/plans/_template.md'); rm('docs/retros/_template.md');
 rm('docs/tasks/archive/_README.md'); rm('memory/_README.md');

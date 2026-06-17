@@ -3,6 +3,41 @@
 All notable changes to the Agentic Development Protocol (ADP) are documented here.
 This project versions the *standard*, not a software package.
 
+## Versioning policy
+
+ADP versions read `<spec-major>.<spec-minor>.<tooling-patch>`:
+
+- **Spec major/minor** (e.g. `1.1`) — the standard itself: core patterns, roles,
+  lifecycle, ratified rules in `PROTOCOL.md`. A new pattern or rule bumps the
+  **minor** (1.1 → 1.2). The spec changes conservatively, earned through a
+  documented miss.
+- **Tooling patch** (the third digit, e.g. `1.1.2`) — the installer, scripts,
+  template wiring, and docs. Fixes and new tooling features bump the **patch**
+  and leave the spec version untouched.
+
+Rule of thumb: if it changes `PROTOCOL.md`, it's a minor (1.2). If it changes the
+installer/template/docs, it's a patch (1.1.x). Pure doc tweaks can ride along
+without their own bump.
+
+## [1.1.3] — 2026-06-17 (initialize helper + polish)
+
+Patch release. **The 1.1 spec is unchanged.**
+
+### Added
+- **`docs/prompts/initialize.md`** — a shipped, one-time "first architect session"
+  bootstrap. Pair it with `docs/prompts/architect.md` to write the first plan +
+  Dispatch and propose ownership lanes. Previously this lived only in external docs.
+- **Versioning policy** documented (see the "Versioning policy" section above):
+  spec = `<major>.<minor>`, tooling = the third digit.
+
+### Fixed
+- Install artifacts (`*.adp-bak`, `*.adp-hooks`, `settings.json.pre-uninstall-*`)
+  are now git-ignored so they can't be accidentally committed (Codex init.mjs retro).
+- The `active` enforcement-status note now reminds you to reload/restart the session
+  to *arm* hooks that were merged into a live `settings.json`.
+
+[1.1.3]: https://github.com/kikenandez/agentic-development-protocol/releases/tag/v1.1.3
+
 ## [1.1.2] — 2026-06-17 (cross-platform installer)
 
 Patch release. **The 1.1 spec is unchanged.** Driven by a Codex install/removal
@@ -22,10 +57,6 @@ retro that found the installer was bash-only (couldn't run on Windows without ba
   (round-trips to an identical file), and `--purge` is a true rollback (removes an
   ADP-created `settings.json` + backups). Un-wire works via `jq` **or** `node`.
 - `uninstall.sh` no longer exits non-zero on a successful run.
-- Install artifacts (`*.adp-bak`, `*.adp-hooks`, `settings.json.pre-uninstall-*`)
-  are now git-ignored so they can't be accidentally committed (Codex init.mjs retro).
-- The `active` enforcement-status note now reminds you to reload/restart the session
-  to *arm* hooks that were merged into a live `settings.json`.
 
 [1.1.2]: https://github.com/kikenandez/agentic-development-protocol/releases/tag/v1.1.2
 
