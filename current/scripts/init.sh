@@ -214,47 +214,75 @@ else
   echo "==> Done. Added $ADDED file(s); skipped $SKIPPED already-present file(s)."
 fi
 
-# --- settings.json: merge-or-warn (ADP install-test finding 1) -------------
-# THE critical gap: the no-clobber copy SKIPS an existing .claude/settings.json,
-# so the hooks land on disk but are never WIRED — enforcement looks installed
-# but is inert. Detect that case and fix it (or warn loudly), never stay silent.
+# --- settings.json: wire the hooks (finding 1 + retro04) -------------------
+# The no-clobber copy SKIPs an existing settings.json, so hooks would land on disk
+# but never be WIRED. We wire them, preferring the flavor that actually runs on
+# THIS machine: bash hooks if jq is present, else the Node hooks if node is present
+# (no jq needed — closes the Windows/jq-less gap). We never silently leave inert
+# hooks; if neither tool is available, or a non-ADP "hooks" key already exists, we
+# park a reference block + warn.
 if [ "$HOST" = "claude-code" ]; then
   SETTINGS="$TARGET/.claude/settings.json"
-  TEMPLATE_SETTINGS="$TEMPLATE_DIR/.claude/settings.json"
-  if [ -f "$SETTINGS" ] && [ -f "$TEMPLATE_SETTINGS" ]; then
+  TPL_BASH="$TEMPLATE_DIR/.claude/settings.json"
+  TPL_NODE="$TEMPLATE_DIR/.claude/settings.node.json"
+  HAVE_JQ=0;   command -v jq   >/dev/null 2>&1 && HAVE_JQ=1
+  HAVE_NODE=0; command -v node >/dev/null 2>&1 && HAVE_NODE=1
+
+  # node-based JSON merge (no jq): set .hooks from $2 into $1, preserve other keys.
+  node_merge_hooks() { # $1=settings $2=template-with-hooks  -> merged JSON on stdout
+    # NOTE: with `node -e`, the first script arg is argv[1] (no script path), so skip ONE.
+    node -e 'const fs=require("fs");const[,a,b]=process.argv;const c=JSON.parse(fs.readFileSync(a,"utf8"));const t=JSON.parse(fs.readFileSync(b,"utf8"));c.hooks=t.hooks;process.stdout.write(JSON.stringify(c,null,2)+"\n")' "$1" "$2"
+  }
+
+  if [ -f "$SETTINGS" ] && [ -f "$TPL_BASH" ]; then
     echo ""
-    echo "==> Wiring hooks into existing .claude/settings.json..."
-    if grep -q 'git-hygiene' "$SETTINGS" 2>/dev/null; then
-      echo "  OK: settings.json already wires the ADP hooks — nothing to do."
-    elif command -v jq >/dev/null 2>&1 && ! grep -q '"hooks"' "$SETTINGS"; then
-      if [ "$DRYRUN" = "1" ]; then
-        echo "  WOULD MERGE ADP hooks into settings.json (jq present, no existing hooks key; backup .adp-bak)."
+    echo "==> Wiring hooks into .claude/settings.json (jq=$HAVE_JQ node=$HAVE_NODE)..."
+    if grep -q 'git-hygiene.mjs' "$SETTINGS" 2>/dev/null; then
+      echo "  OK: settings.json already wires the Node hooks."
+    elif grep -q 'git-hygiene.sh' "$SETTINGS" 2>/dev/null; then
+      # Already bash-wired (e.g. the fresh template copy). Keep it if jq is present;
+      # otherwise prefer Node hooks — but only auto-swap a pristine template copy.
+      if [ "$HAVE_JQ" = 1 ]; then
+        echo "  OK: settings.json wires the bash hooks (jq present)."
+      elif [ "$HAVE_NODE" = 1 ] && cmp -s "$SETTINGS" "$TPL_BASH"; then
+        if [ "$DRYRUN" = "1" ]; then echo "  WOULD SWITCH to Node hooks (jq absent, node present)."
+        else cp -p "$SETTINGS" "$SETTINGS.adp-bak"; cp -p "$TPL_NODE" "$SETTINGS"
+          echo "  SWITCHED to Node hooks (jq absent, node present) — enforcement live without jq."
+          echo "switch: .claude/settings.json -> Node hooks (jq absent)" >> "$MERGES_TMP"; fi
       else
-        # Safe case: your settings.json has no "hooks" key — inject ADP's, keep all else.
-        tmp="$(mktemp)"
-        if jq --slurpfile adp "$TEMPLATE_SETTINGS" '. + {hooks: $adp[0].hooks}' "$SETTINGS" > "$tmp" 2>/dev/null; then
-          cp -p "$SETTINGS" "$SETTINGS.adp-bak"
-          mv "$tmp" "$SETTINGS"
-          echo "  MERGED ADP hooks into settings.json (your other keys preserved; old kept as settings.json.adp-bak)."
-          echo "merge: .claude/settings.json (hooks key added; backup .adp-bak)" >> "$MERGES_TMP"
-        else
-          rm -f "$tmp"
-          cp -p "$TEMPLATE_SETTINGS" "$SETTINGS.adp-hooks"
-          echo "  WARN: jq merge failed. Reference hooks written to settings.json.adp-hooks — merge by hand."
-        fi
+        echo "  WARN: bash hooks wired but jq absent (and can't auto-switch) — INERT."
+        echo "        Install jq, or: cp .claude/settings.node.json .claude/settings.json"
       fi
+    elif grep -q '"hooks"' "$SETTINGS" 2>/dev/null; then
+      # Non-ADP hooks key present — unsafe to auto-merge.
+      if [ "$DRYRUN" = "1" ]; then echo "  WOULD WARN: settings.json has its own \"hooks\" key; would write sidecar."
+      else cp -p "$TPL_BASH" "$SETTINGS.adp-hooks"
+        echo "  WARN: settings.json has its own \"hooks\" key — NOT modified."
+        echo "        Merge the block from .claude/settings.json.adp-hooks by hand."; fi
+    elif [ "$HAVE_JQ" = 1 ]; then
+      # No hooks key + jq -> merge bash hooks.
+      if [ "$DRYRUN" = "1" ]; then echo "  WOULD MERGE bash hooks (jq; backup .adp-bak)."
+      else tmp="$(mktemp)"
+        if jq --slurpfile adp "$TPL_BASH" '. + {hooks: $adp[0].hooks}' "$SETTINGS" > "$tmp" 2>/dev/null; then
+          cp -p "$SETTINGS" "$SETTINGS.adp-bak"; mv "$tmp" "$SETTINGS"
+          echo "  MERGED bash hooks into settings.json (your keys preserved; old kept .adp-bak)."
+          echo "merge: .claude/settings.json (bash hooks; backup .adp-bak)" >> "$MERGES_TMP"
+        else rm -f "$tmp"; cp -p "$TPL_BASH" "$SETTINGS.adp-hooks"; echo "  WARN: jq merge failed — sidecar written."; fi; fi
+    elif [ "$HAVE_NODE" = 1 ]; then
+      # No hooks key + no jq + node -> merge Node hooks via node (no jq needed).
+      if [ "$DRYRUN" = "1" ]; then echo "  WOULD MERGE Node hooks via node (jq absent; backup .adp-bak)."
+      else tmp="$(mktemp)"
+        if node_merge_hooks "$SETTINGS" "$TPL_NODE" > "$tmp" 2>/dev/null && [ -s "$tmp" ]; then
+          cp -p "$SETTINGS" "$SETTINGS.adp-bak"; mv "$tmp" "$SETTINGS"
+          echo "  MERGED Node hooks into settings.json via node (your keys preserved; old kept .adp-bak)."
+          echo "merge: .claude/settings.json (Node hooks via node; backup .adp-bak)" >> "$MERGES_TMP"
+        else rm -f "$tmp"; cp -p "$TPL_NODE" "$SETTINGS.adp-hooks"; echo "  WARN: node merge failed — sidecar written."; fi; fi
     else
-      # Unsafe to auto-merge: no jq, OR a "hooks" key already exists.
-      if [ "$DRYRUN" = "1" ]; then
-        echo "  WOULD WARN: settings.json NOT modified (no jq, or it has a \"hooks\" key); would write settings.json.adp-hooks sidecar."
-      else
-        cp -p "$TEMPLATE_SETTINGS" "$SETTINGS.adp-hooks"
-        echo "  WARN: settings.json was NOT modified (no jq, or it already has a \"hooks\" key)."
-        echo "        The hooks are on disk but INERT until wired in."
-        echo "        Reference block written to: .claude/settings.json.adp-hooks"
-        echo "        Merge its \"hooks\" object into your settings.json, then run the"
-        echo "        deliberate-violation test below to confirm enforcement fires."
-      fi
+      # Neither jq nor node.
+      if [ "$DRYRUN" = "1" ]; then echo "  WOULD WARN: no jq and no node — would write sidecar."
+      else cp -p "$TPL_BASH" "$SETTINGS.adp-hooks"
+        echo "  WARN: no jq and no node — settings.json NOT wired (hooks INERT)."
+        echo "        Install jq or node, then wire from .claude/settings.json.adp-hooks."; fi
     fi
   fi
 fi
@@ -369,8 +397,10 @@ fi
 ENF="none"
 if [ "$HOST" = "claude-code" ]; then
   SET="$TARGET/.claude/settings.json"
-  if [ -f "$SET" ] && grep -q 'git-hygiene' "$SET" 2>/dev/null; then
-    if command -v jq >/dev/null 2>&1; then ENF="active"; else ENF="inert_nojq"; fi
+  if grep -q 'git-hygiene.mjs' "$SET" 2>/dev/null; then
+    command -v node >/dev/null 2>&1 && ENF="active_node" || ENF="inert_nonode"
+  elif grep -q 'git-hygiene.sh' "$SET" 2>/dev/null; then
+    command -v jq >/dev/null 2>&1 && ENF="active_bash" || ENF="inert_nojq"
   else
     ENF="notwired"
   fi
@@ -383,16 +413,21 @@ case "$ENF" in
     echo "  L3 enforcement NOT installed — this is a prose-only install."
     echo "  The git-hygiene / freshness hooks were not added. To enable enforcement"
     echo "  later, re-run with --host=claude-code." ;;
-  active)
-    echo "  Hooks WIRED (bash) and jq present. Looks ready."
+  active_bash)
+    echo "  Hooks WIRED (bash) and jq present — looks ready."
+    echo "  *** REQUIRED final check *** in a Claude Code session try 'git add -A'"
+    echo "  and confirm it is BLOCKED. Config can be right yet the host not fire it." ;;
+  active_node)
+    echo "  Hooks WIRED (Node) and node present — looks ready, no jq needed."
     echo "  *** REQUIRED final check *** in a Claude Code session try 'git add -A'"
     echo "  and confirm it is BLOCKED. Config can be right yet the host not fire it." ;;
   inert_nojq)
-    echo "  Hooks wired but INERT — jq is NOT installed, so the bash hooks no-op."
-    echo "  Fix it one of two ways, then live-test 'git add -A':"
-    echo "    - install jq, OR"
-    echo "    - use the Node hooks (no jq needed):"
+    echo "  Hooks wired (bash) but INERT — jq is NOT installed, so they no-op."
+    echo "  Fix it, then live-test 'git add -A': install jq, OR switch to Node hooks:"
     echo "        cp .claude/settings.node.json .claude/settings.json" ;;
+  inert_nonode)
+    echo "  Hooks wired (Node) but INERT — node is NOT on PATH. Install Node.js,"
+    echo "  then live-test 'git add -A'." ;;
   notwired)
     echo "  Hooks NOT wired — your existing settings.json was preserved and the"
     echo "  hooks block was not merged (see .claude/settings.json.adp-hooks)."

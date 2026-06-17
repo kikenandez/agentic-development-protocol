@@ -25,5 +25,7 @@ What's new in 1.1.1 (installer & tooling — no spec change):
   so a generic install is truly prose-only
 - INSTALL_MANIFEST written; uninstall.sh (safe / --dry-run / --purge)
 - Cross-platform Node hooks (.mjs — no jq, no bash) + settings.node.json
+- jq-less auto-wiring: with --host=claude-code on a host that has Node but no jq,
+  init.sh now wires the Node hooks automatically (live enforcement, no manual step)
 - verify-hooks.sh and verify-hooks.mjs offline self-tests
 - PROJECT_NAME centralized to memory/CLAUDE.md (role prompts stay generic)
