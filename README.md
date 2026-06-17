@@ -17,7 +17,7 @@ what production validated, what it discarded, and why.
 
 | Path | What it is |
 |------|-----------|
-| [`current/`](./current/) | The ratified **ADP 1.1** bundle (tooling **1.1.1**) — spec, scripts, and the template ADP installs into your repo. **Start here.** |
+| [`current/`](./current/) | The ratified **ADP 1.1** bundle (tooling **1.1.2**) — spec, scripts, and the template ADP installs into your repo. **Start here.** |
 | [`current/PROTOCOL.md`](./current/PROTOCOL.md) | The canonical specification. Read this first. |
 | [`current/template/`](./current/template/) | The files ADP installs into a target repository. |
 
@@ -42,6 +42,14 @@ cd /path/to/your/repo && git checkout -b adopt-adp && cd -
 ./scripts/init.sh --dry-run /path/to/your/repo          # preview — writes nothing
 ./scripts/init.sh --host=claude-code /path/to/your/repo # install with enforcement
 #   omit --host=claude-code for a prose-only install; add --ci for the CI workflow
+```
+
+**Windows, or any host without bash?** Use the cross-platform Node installer — same
+flags, needs only `node` (no bash, no jq):
+
+```bash
+node ./scripts/init.mjs --host=claude-code /path/to/your/repo
+node ./scripts/uninstall.mjs --purge /path/to/your/repo   # full rollback
 ```
 
 The installer is non-destructive (no-clobber + merge), writes an

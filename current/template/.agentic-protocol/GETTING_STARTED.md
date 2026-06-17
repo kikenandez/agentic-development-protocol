@@ -1,4 +1,4 @@
-# Getting Started — Agentic Development Protocol (ADP) 1.1 (tooling 1.1.1)
+# Getting Started — Agentic Development Protocol (ADP) 1.1 (tooling 1.1.2)
 
 You've installed the protocol. This walkthrough gets you from "files on disk" to "first parallel multi-agent session" in about 15 minutes.
 
@@ -39,7 +39,7 @@ ls -la docs/plans/
 # Expect: _template.md, archive/
 
 cat .agentic-protocol/VERSION
-# Expect: ADP 1.1.1
+# Expect: ADP 1.1.2
 ```
 
 If anything's missing, re-run the init script or `cp -r template/. .` from the protocol repo.

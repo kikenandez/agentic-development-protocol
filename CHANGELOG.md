@@ -3,6 +3,28 @@
 All notable changes to the Agentic Development Protocol (ADP) are documented here.
 This project versions the *standard*, not a software package.
 
+## [1.1.2] — 2026-06-17 (cross-platform installer)
+
+Patch release. **The 1.1 spec is unchanged.** Driven by a Codex install/removal
+retro that found the installer was bash-only (couldn't run on Windows without bash).
+
+### Added
+- **Cross-platform Node installer** — `scripts/init.mjs` + `scripts/uninstall.mjs`
+  run with only `node` (no bash, no jq) — for Windows and other bash-less hosts.
+  Native JSON merge; wires the Node hooks; full feature parity (generic /
+  `--host=claude-code` / `--ci` / `--dry-run` / dirty-tree / manifest / status).
+  `init.sh` remains the canonical Unix installer.
+- **Index-size guard** — `generate_map.py` warns when an index exceeds ~25k tokens
+  and suggests scoping it (excluding benchmark/generated dirs).
+
+### Fixed
+- **Reversible `.gitignore`** — `uninstall` now removes the ADP `.gitignore` block
+  (round-trips to an identical file), and `--purge` is a true rollback (removes an
+  ADP-created `settings.json` + backups). Un-wire works via `jq` **or** `node`.
+- `uninstall.sh` no longer exits non-zero on a successful run.
+
+[1.1.2]: https://github.com/kikenandez/agentic-development-protocol/releases/tag/v1.1.2
+
 ## [1.1.1] — 2026-06-17 (installer & tooling hardening)
 
 Patch release. **The 1.1 spec is unchanged** — these are installer/tooling fixes,
