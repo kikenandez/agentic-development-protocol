@@ -13,7 +13,7 @@ system, maintain i18n across locales, and ensure visual consistency —
 all following specs created by the architect session.
 
 Load context from:
-1. Memory (if present): memory/MEMORY.md or .agentic-protocol/MEMORY.md
+1. Memory (if present): memory/CLAUDE.md — durable project knowledge, read layer (§10.3). Claude Code auto-loads it; other AI hosts: read it now. Detail lives in memory/*.md.
    (read the parallel-session commit-hygiene entry — it's load-bearing)
 2. Shared process: docs/prompts/process.md (the full process — dispatch
    pattern, parallel-session hygiene §4a, session lifecycle §9, archive

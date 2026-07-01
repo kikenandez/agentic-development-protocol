@@ -17,7 +17,7 @@ what production validated, what it discarded, and why.
 
 | Path | What it is |
 |------|-----------|
-| [`current/`](./current/) | The ratified **ADP 1.1** bundle (tooling **1.1.4**) — spec, scripts, and the template ADP installs into your repo. **Start here.** |
+| [`current/`](./current/) | The ratified **ADP 1.1** bundle (tooling **1.1.5**) — spec, scripts, and the template ADP installs into your repo. **Start here.** |
 | [`current/PROTOCOL.md`](./current/PROTOCOL.md) | The canonical specification. Read this first. |
 | [`current/template/`](./current/template/) | The files ADP installs into a target repository. |
 

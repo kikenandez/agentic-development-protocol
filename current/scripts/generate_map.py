@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """generate_map.py — codebase-index AST generator (ADP §7.3).
 
+LANGUAGE SUPPORT: Python (.py) ONLY — this uses Python's `ast`. JS/TS/HTML and
+other languages are not indexed (a polyglot repo indexes just its Python; a
+non-Python repo produces an empty index). The codebase index is an optional
+convenience; the rest of ADP is language-agnostic.
+
 Walks a repo, parses every Python file, and writes a low-token AST skeleton:
 classes, function/method signatures, type-hinted attributes, and internal
 imports — NO implementation bodies. Output is two files at the repo root:

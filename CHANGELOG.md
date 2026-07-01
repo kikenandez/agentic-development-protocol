@@ -19,6 +19,38 @@ Rule of thumb: if it changes `PROTOCOL.md`, it's a minor (1.2). If it changes th
 installer/template/docs, it's a patch (1.1.x). Pure doc tweaks can ride along
 without their own bump.
 
+## [1.1.5] — 2026-06-18 (install-feedback fixes)
+
+Patch release. **The 1.1 spec is unchanged.** From real install feedback.
+
+### Fixed
+- **Ownership vs. `current.md` contradiction** — §3 requires the developer/designer to
+  update their task's Status/Result in `current.md`, but §4 listed all of `docs/tasks/`
+  as architect-owned, so an agent auto-configuring lanes would (and did) put it in a
+  role's `DO_NOT_TOUCH` and block the workflow. Clarified everywhere: **coordination
+  files (`docs/tasks/current.md`, `docs/plans/`, `memory/`, `.adp/`) are shared, not
+  code lanes** — never `DO_NOT_TOUCH` them. The lanes are for your product code only;
+  **no ADP-installed path** (`docs/*`, `memory/`, `.adp/`, `.agentic-protocol/`,
+  `.claude/`, `.github/workflows/`) belongs in a lane. Fixed the misleading `adp.answers`
+  example that listed `docs/`. (process.md §4, GETTING_STARTED, adp.answers.)
+- **Memory filename mismatch** — the role prompts told sessions to load
+  `memory/MEMORY.md`, but the repo ships `memory/CLAUDE.md`. Prompts now point at
+  `memory/CLAUDE.md` (with a note that Claude Code auto-loads it; other hosts read it
+  on startup). This mostly bit non-Claude hosts, which don't auto-load `CLAUDE.md`.
+
+### Changed
+- **`adp.answers` is now self-documenting** — a syntax header (how `KEY=value` is
+  parsed) plus a per-key `# e.g.` example for every field, so it's obvious what each
+  value should look like.
+- **Clarified `codebase_index.txt` is auto-generated** by `scripts/generate_map.py`
+  (never hand-filled, and not part of `adp.answers`) — noted in the answers header
+  and in `GETTING_STARTED.md`.
+- **Documented that the codebase index is Python-only** (`generate_map.py` uses
+  Python's `ast`; JS/TS/HTML/other are not indexed). It's an optional L2 convenience;
+  the rest of ADP is language-agnostic.
+
+[1.1.5]: https://github.com/kikenandez/agentic-development-protocol/releases/tag/v1.1.5
+
 ## [1.1.4] — 2026-06-17 (configuration ergonomics)
 
 Patch release. **The 1.1 spec is unchanged.** Closes the remaining backlog ergonomics.
