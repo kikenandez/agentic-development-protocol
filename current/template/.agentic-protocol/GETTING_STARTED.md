@@ -1,4 +1,4 @@
-# Getting Started — Agentic Development Protocol (ADP) 1.1 (tooling 1.1.4)
+# Getting Started — Agentic Development Protocol (ADP) 1.1 (tooling 1.1.5)
 
 You've installed the protocol. This walkthrough gets you from "files on disk" to "first parallel multi-agent session" in about 15 minutes.
 
@@ -39,7 +39,7 @@ ls -la docs/plans/
 # Expect: _template.md, archive/
 
 cat .agentic-protocol/VERSION
-# Expect: ADP 1.1.4
+# Expect: ADP 1.1.5
 ```
 
 If anything's missing, re-run the init script or `cp -r template/. .` from the protocol repo.
@@ -115,6 +115,26 @@ how to map other layouts:
 Rule of thumb: a lane is a set of paths **one** session can own without colliding
 with another. If two roles need the same path, that's a handoff task, not a shared
 lane. When in doubt, fewer roles + clear dirs beats more roles + overlapping paths.
+
+> **Lanes are for your product CODE only — never put an ADP-installed path in a lane.**
+> That means none of `docs/tasks/` (or `current.md`), `docs/plans/`, `docs/prompts/`,
+> `docs/skills/`, `memory/`, `.adp/`, `.agentic-protocol/`, `.claude/`, or
+> `.github/workflows/` belong in any role's `OWNED_PATHS` / `DO_NOT_TOUCH` — they're
+> governed by process.md §4. In particular `current.md` (and `.adp/`) are co-edited/
+> machine-managed, so a `DO_NOT_TOUCH` on them would stop the developer/designer from
+> reporting their work.
+
+> **Generated files, not hand-filled:** `codebase_index.txt` and
+> `codebase_tests_index.txt` are produced automatically by
+> `python scripts/generate_map.py .` (an AST skeleton — signatures + imports, no
+> bodies). Run it once now, and re-run after structural changes. Never edit them by
+> hand. They are *not* part of `adp.answers`.
+>
+> **Language support:** `generate_map.py` currently indexes **Python (`.py`) only**
+> (it uses Python's `ast`). JS/TS/HTML/other languages are **not** indexed — on a
+> polyglot repo the index covers just the Python parts, and on a non-Python repo it's
+> empty. That's fine: the codebase index is an *optional* convenience (L2), not
+> required. The rest of ADP is fully language-agnostic.
 
 **Sanity check:** search the prompts for any remaining `<<<...>>>` placeholders and replace them:
 
