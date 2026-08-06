@@ -60,8 +60,7 @@ Elevate ADP's already-practiced "upfront decision-sharing" to a named pattern in
 verified `file:line` primitives, or a `HYPOTHESIS` tag) and the **single-source-of-
 truth engine** rule (one derivation per capability; lanes never re-derive it). This
 is what actually answers the "parallel agents make conflicting decisions" critique —
-the mechanism exists in production but isn't *named* in the spec. See
-`ADP_Decision_Sharing_Answer.md` (consulting materials).
+the mechanism exists in production but isn't *named* in the spec.
 
 ---
 
