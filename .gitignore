@@ -15,3 +15,12 @@ Thumbs.db
 # Local env
 .env
 *.local
+
+# Private: install-specific / own-project evidence — never published.
+# Only the portable standard ships; per-project fit analyses, pilot review
+# instrumentation, and working notes stay local.
+ADP-*-FIT-*.md
+ADP-*-REVIEW-INPUTS*.md
+paper/
+ADP-1.2.1-PROPOSAL.md
+ADP-*-N2-*.md

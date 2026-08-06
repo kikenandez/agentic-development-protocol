@@ -71,6 +71,14 @@ protocol marks what it has falsified and uses an n-counter so rules aren't adopt
 on a single anecdote. Read the spec and the commit history before trusting a word
 of it — that transparency is the point.
 
+## Roadmap
+
+**Spec 1.1 is the current stable standard** (tooling 1.1.5). A set of **1.2 candidate
+deltas** is in pilot — one cut a production system's live context ~85%, one was
+pruned for being unadopted ceremony. Per ADP's own rule, none graduate into the spec
+until a *second* project reproduces them (n=2). See [`ROADMAP.md`](./ROADMAP.md) and
+[`proposals/ADP-1.2-candidates.md`](./proposals/ADP-1.2-candidates.md).
+
 ## License
 
 ADP is open and **dual-licensed**:

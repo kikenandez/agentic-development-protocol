@@ -85,36 +85,40 @@ the mechanism exists in production but isn't *named* in the spec. See
 
 ---
 
-## n=2 project has arrived — [private-project] (evidence in review, not yet folded)
+## n=2 project has arrived (evidence in review, not yet folded)
 
-The second independent install the promotion gate asks for is **[private-project]**
-(deterministic embedded C++ / PlatformIO — the deliberate opposite of [private-project]'s
-LLM web stack). Its ~80-round proto-ADP was harvested into two companion docs at repo
-root: **`ADP-1.2-N2-[private-project]-harvest.md`** (full cross-map) and
-**`ADP-1.2-N2-[private-project]-T384-reviewer-note.md`** (drop-in for the 2026-07-04 review).
-Recorded here so the gate is visible; **candidate grades above are unchanged pending
-the review** (this is n=2 *evidence*, not a graduation).
+The second independent install the promotion gate asks for now exists: a
+**deterministic embedded C++ / PlatformIO system** — the deliberate opposite of the
+n=1 pilot's LLM web stack. Its ~80-round proto-ADP was retrospectively harvested
+(cross-map + a drop-in reviewer note for the 2026-07-04 review; both maintained
+privately — the project is not public). Recorded here so the gate is visible;
+**candidate grades above are unchanged pending the review** (this is n=2 *evidence*,
+not a graduation).
 
 Per-candidate n=2 signal (deterministic-stack second occurrence):
 
-- **#1 Simplification** — corroborated as a *concept* ([private-project] independently ratified
-  "coverage-theatre tests are negative-value"); the *recurring-mechanism* caveat is
-  untested here too. No change to the caveat.
+- **#1 Simplification** — corroborated as a *concept* (the second install
+  independently ratified "coverage-theatre tests are negative-value"); the
+  *recurring-mechanism* caveat is untested here too. No change to the caveat.
 - **#2 Functional-change / fingerprint** — corroborated **with a precondition**: a
-  fingerprint over a *self-consistent mock* is green-forever-wrong-forever ([private-project]'s
-  "internally-consistent-but-wrong" hazard). The golden suite must exercise the
-  **production path**, not a self-authored mock. [private-project]'s own surface
-  (`hash(pio test + per-env .bin size)`) meets this.
-- **#4 Taxonomy + recurrence counters** — corroborated + calibrated: [private-project]'s promotion
-  ladder shows the **n=1 candidate tier is sweep-fragile** and the threshold is
-  **risk-weighted** (high-blast-radius spec rules ran to n=4–6, not n=2).
+  fingerprint over a *self-consistent mock* is green-forever-wrong-forever (an
+  "internally-consistent-but-wrong" hazard observed in the field: host decoder +
+  host structs agreed with each other while both diverged from the real device
+  wire). The golden suite must exercise the **production path**, not a self-authored
+  mock. The install's own fingerprint surface (hash of test output + per-env binary
+  size) meets this.
+- **#4 Taxonomy + recurrence counters** — corroborated + calibrated: the install's
+  promotion ladder shows the **n=1 candidate tier is sweep-fragile** and the
+  threshold is **risk-weighted** (high-blast-radius spec rules ran to n=4–6, not n=2).
 - **#5 Decision-sharing / verify-before-claim** — **deepened, not just corroborated.**
-  [private-project] shows identifier-level "verify the primitive" is insufficient; the real failure
-  class is **semantic** (right name, wrong value / operator / mirror-count / arg-order /
-  cardinality — 6 sub-modes). Its ratified `process.md §5a` is a portable, worked
-  implementation. This is the one item proposing a **structural addition**: a PLAN-side
-  verification pillar. See the reviewer note's pre-registered question on whether it
-  graduates now (n=1-install exception) or runs [private-project]'s own window first.
+  The second install shows identifier-level "verify the primitive" is insufficient;
+  the real failure class is **semantic** (right name, wrong value / operator /
+  mirror-count / arg-order / cardinality — 6 sub-modes), caught in six distinct real
+  incidents. Its ratified semantic-verification checklist is a portable, worked
+  implementation. This is the one item proposing a **structural addition**: a
+  PLAN-side verification pillar. A pre-registered question is on the review table:
+  does it graduate now (n=1-install exception) or run the second install's own
+  measurement window first.
 
 ## Promotion gate
 
