@@ -71,6 +71,15 @@ protocol marks what it has falsified and uses an n-counter so rules aren't adopt
 on a single anecdote. Read the spec and the commit history before trusting a word
 of it — that transparency is the point.
 
+How every published number is counted — units, the claim-acceptance procedure,
+the recurrence and escape-classification rules, what does and does not count as a
+false accept — is specified in [`MEASUREMENT.md`](./MEASUREMENT.md). The fastest
+single test of the protocol is the
+[six-class semantic checklist](./proposals/semantic-verification-checklist.md):
+run it against your team's next ten specs and
+[report what it caught](./.github/ISSUE_TEMPLATE/install-report.md) — zero catches
+is a result we want published too.
+
 ## Roadmap
 
 **Spec 1.1 is the current stable standard** (tooling 1.1.5). A set of **1.2 candidate
