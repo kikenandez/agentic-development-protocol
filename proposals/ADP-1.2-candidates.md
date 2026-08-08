@@ -25,6 +25,12 @@ an enforceable unit of work rather than a good intention.
   *institutionalization* — generating simplification tasks on a cadence — showed
   **0 recurring uses** after the first. Carry to n=2 as "one-off win proven,
   recurring mechanism unproven"; do **not** treat the 85% as evidence it recurs.
+- **Caveat UPDATE (post-pilot, 2026-08-08):** in the five weeks after the review,
+  the mechanism fired repeatedly **without external forcing** on the same install —
+  an in-place trim of a standing process section, a multi-commit fold of the
+  doc-debt ledger into the canonical docs, and a spawned repair task after
+  measuring an archive index ~22% unreachable. Recurrence is now **proven within
+  the n=1 install**; still awaiting any second-install recurrence.
 
 ### 2. `Functional-change:` commit trailer
 Every commit body carries a one-line trailer stating whether behaviour changed
@@ -53,6 +59,13 @@ spawn a consolidation task; a doc-sync counter → schedule a docs refresh).
 - **Evidence (n=1):** the refactor counter spawned a real consolidation task — and
   the review *caught the counter over-counting* (6 sites → 2 primitives), i.e. the
   mechanism earned its keep by forcing the investigation.
+- **Calibration UPDATE (post-pilot, 2026-08-08) — a counter DESIGN failure mode:**
+  the doc-sync counter as adopted **could not fire** — it reset on any touch to the
+  breadcrumb ledger, i.e. on the very activity it was built to force. Found five
+  weeks later with a 10-entry unfolded backlog and the trigger never having fired.
+  Portable rule for any recurrence counter: **a counter that resets on the activity
+  it is meant to force will never fire — count the BACKLOG (unfolded entries), not
+  the touches.** Only the corrective action (a fold) reduces the count.
 
 ### 5. Decision-sharing as a named core pattern *(from the market comparison)*
 Elevate ADP's already-practiced "upfront decision-sharing" to a named pattern in
@@ -119,8 +132,76 @@ Per-candidate n=2 signal (deterministic-stack second occurrence):
   does it graduate now (n=1-install exception) or run the second install's own
   measurement window first.
 
+## First candidate at n=2: explicit-pathspec commits
+
+One commit-hygiene delta has now been **independently ratified by both installs,
+from real sweep incidents on opposite stacks** (embedded C++ shared-worktree; LLM
+web shared-worktree): with parallel sessions on one working tree, a bare
+`git commit` snapshots the entire shared index and sweeps a co-session's staged
+files — exact-path *staging* and pre-commit status checks on the victim's side
+cannot prevent it. Both installs converged on the same remedy:
+
+> **Always commit with an explicit pathspec: `git commit -- <paths>`.** A hygiene
+> rule that depends on *when* you look is weaker than one that constrains *what
+> the command can touch*. (Obviated above worktree-per-session; required below it.)
+
+This is the promotion gate satisfied as written — ratifiable into `PROTOCOL.md`
+§6.4 at the next spec pass, independent of the pending measurement window.
+
+**Its boundary, found immediately by the first install:** pathspec commits (and
+every other hygiene rule) operate at **file** granularity, so none can see two
+lanes' content inside ONE legitimately-shared file — see the shared-file candidate
+below.
+
+---
+
+## Post-pilot deltas from the n=1 install (harvested 2026-08-08; n=1 by install)
+
+The n=1 install kept running the graduated deltas for five weeks after its review
+and ratified three further mechanisms from live incidents. Recorded here as new
+candidates awaiting their own n=2:
+
+1. **Escape-classified miss log** *(extends #4 and the two-bound rule).* When
+   detection improves, the miss count **rises** while cost-per-entry collapses —
+   and a naive one-rule-per-miss reflex then over-mints rules on a corpus whose
+   binding constraint is recall. Rule: tag every miss `Escape: CAUGHT` (falsified
+   before any code was written against it — a gate *success*) or `ESCAPED`
+   (reached code/commit/prod/a closed verdict); **only ESCAPED entries advance a
+   candidate rule's n-counter**; a repeated CAUGHT shape produces a one-line
+   spec-body **`VERIFY:` field** — the architect names the single premise they are
+   least certain of, and the implementing session checks it FIRST, reporting
+   CONFIRMED/FALSIFIED. Selection heuristic with real receipts: *flag the claim
+   that makes the problem look simplest* — across six consecutive misses the
+   tidier reading was wrong every time. (Converges with candidate #5's PLAN-side
+   verification pillar from the opposite direction: a per-task named-uncertainty
+   bet vs a semantic checklist — one pillar, two forms; do not double-count.)
+
+2. **Subsume-or-don't-ratify** *(extends #1's subtraction ethos to the rule corpus
+   itself).* Tracking a simplification-to-addition ratio is not enforcement — one
+   week ran 6 rule additions / 0 simplifications on a ~50-rule corpus. Rule: a
+   ratification note MUST name what the new rule subsumes, replaces, or downgrades
+   — or state why nothing is subsumable. Preference: generalize an existing rule
+   in place → absorb as a sub-case (keeping its mechanical check verbatim) → only
+   then a new number, with a sentence on why the first two fail. Guard: subsuming
+   must never replace a mechanical check with a judgment call — generalization
+   adds a *trigger* that indexes existing checks, never deletes them.
+
+3. **Shared-file ownership follows EDIT SHAPE** *(closes the gap above the
+   pathspec rule).* When two lanes legitimately edit one file, every file-granular
+   hygiene rule is blind. Resolution keys on the file's edit shape, not its
+   directory: **narrative, edited-in-place** shared files get a **single writer**
+   (lanes deliver content through their session handoff instead); **append-only /
+   row-oriented ledgers** stay lane-writable in-commit (centralizing would
+   recreate the staleness they exist to prevent), and their residual sweep
+   exposure is neutralized by scoping the commit's *label* to the file's purpose
+   rather than to the committer's task. Diagnostic that picks the right fix:
+   "two lanes touched one file" is **two** failure modes — content *lost* vs
+   content *mislabelled* — and partitioning fixes only the first.
+
 ## Promotion gate
 
 Each graduate-candidate enters `PROTOCOL.md` as **1.2** only when a **second
 independent project (n=2)** reproduces its win, carrying the caveats above. Until
-then this stays a proposal and the spec stays **1.1**.
+then this stays a proposal and the spec stays **1.1**. *(Status 2026-08-08: the
+pathspec-commit delta above is the first to clear the gate; the second install's
+forward measurement window — the blocker for the rest — has not yet started.)*

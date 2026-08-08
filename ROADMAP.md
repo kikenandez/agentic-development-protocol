@@ -22,6 +22,14 @@ The current pilot is **n=1**. A delta that worked once is a strong signal, not a
 ratified rule. So `PROTOCOL.md` stays on 1.1 until a second project reproduces the
 wins. (This is ADP applying its own "verified, not trusted" bar to itself.)
 
+**Status 2026-08-08.** A second install exists and its retrospective harvest is
+in review; its forward measurement window has not yet run — that window is the
+blocker for ratification. One delta has already cleared the n=2 gate from real
+incidents on both installs (explicit-pathspec commits, `git commit -- <paths>`)
+and is ratifiable at the next spec pass. The n=1 install's five post-pilot weeks
+also upgraded two candidate caveats and contributed three new candidates — see
+`proposals/ADP-1.2-candidates.md`.
+
 One candidate was already **pruned** in the pilot for being unadopted ceremony —
 evidence the review mechanism isn't self-preserving.
 
