@@ -1,6 +1,6 @@
 # Agentic Development Protocol (ADP)
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21982389.svg)](https://doi.org/10.5281/zenodo.21982389)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21982389-1682D4.svg)](https://doi.org/10.5281/zenodo.21982389)
 [![Code: MIT](https://img.shields.io/badge/code-MIT-blue.svg)](./LICENSE-CODE-MIT.txt)
 [![Docs: CC BY 4.0](https://img.shields.io/badge/docs-CC%20BY%204.0-lightgrey.svg)](./LICENSE-DOCS-CC-BY-4.0.txt)
 
