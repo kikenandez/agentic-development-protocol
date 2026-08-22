@@ -19,6 +19,33 @@ Rule of thumb: if it changes `PROTOCOL.md`, it's a minor (1.2). If it changes th
 installer/template/docs, it's a patch (1.1.x). Pure doc tweaks can ride along
 without their own bump.
 
+## [Unreleased]
+
+### Added
+
+- **`current/scripts/adp_ledger_migrate.py`** — converts a prose miss ledger into
+  `misses.yml`, one record per numbered miss. Reports field coverage honestly and
+  leaves absent fields null rather than guessed.
+
+### Corrected
+
+- **The miss-ledger count.** Previously published as *121 entries, #7–#129*. The
+  correct figure is **159 entries, #7–#170**, with five gaps (#65, #101–#103, #105)
+  and one duplicate opener at #38. The ledger had accumulated **four** entry formats
+  over six months, so every count taken was a count of one format: 66, 121, 136, 159.
+  The migration tool reported 66 on its first run — silently — and was caught only
+  because an independent line count disagreed. It now agrees with that count exactly.
+
+### Found by structuring the ledger
+
+- Misses per month: May 42 · Jun 13 · Jul 5 · **Aug 87**.
+- Escape classification covers **34 of 159 entries (21%), all in August**. The
+  convention was ratified 2026-08-07; August holds 87 dated entries, so adherence is
+  **39%** — against 35.4% for the unenforced `Functional-change:` trailer and 80.8%
+  for the task ID the workflow depends on. Two unenforced conventions, different
+  artefacts, months apart, both decaying to roughly a third. Not a controlled
+  experiment; recorded as a second instance of a finding the ledger produced by hand.
+
 ## [1.1.6] — 2026-08-22 (measurement, evidence, citation)
 
 Patch release. **The 1.1 spec is unchanged.** This release makes the protocol's claims
