@@ -19,6 +19,48 @@ Rule of thumb: if it changes `PROTOCOL.md`, it's a minor (1.2). If it changes th
 installer/template/docs, it's a patch (1.1.x). Pure doc tweaks can ride along
 without their own bump.
 
+## [1.1.6] — 2026-08-22 (measurement, evidence, citation)
+
+Patch release. **The 1.1 spec is unchanged.** This release makes the protocol's claims
+about itself auditable, and corrects two that were not.
+
+### Added
+
+- **`current/scripts/adp_claims.py`** — executes the claim-counting procedure defined in
+  `MEASUREMENT.md` §2, which had been documented but never run. Reports a range (distinct
+  claim units and mentions), emits per-verdict receipts with file and line, and prints its
+  own blind spots.
+- **`current/scripts/adp_history.py`** — derives the output mix of an install from git
+  history: corpus composition, churn, cadence, convention adherence. Excludes generated
+  artifacts, and says so.
+- **`evidence/`** — published receipts and analyses so the figures can be audited rather
+  than believed. 855 receipt rows, both installs, pinned commits, with limits stated.
+- **`CITATION.cff`** — DOI and ORCID, so GitHub renders "Cite this repository".
+- **`protocolreview.md`** — the protocol review written up as a recurring, portable ritual (v0.1, n=1).
+- Preprint published: doi:10.5281/zenodo.21982389.
+
+### Corrected
+
+- **The falsification scorecard.** Previously published as *529 accepted / 22 falsified*.
+  That pair had never been derived — the counting rule existed, the execution did not.
+  Measured at commit `d006a752`: **249 accepted / 43 falsified** (lower bound; 422 / 61 by
+  mentions). Accepted is lower than published; falsified is roughly double.
+- **The commit count.** Previously published as *1,768*. It reconciles with no clean
+  definition of the repository's history. The reproducible figure is **3,618 non-merge
+  commits** at `1f79af15`.
+- **README figures** brought in line with measurement: 121 miss-ledger entries (was "past
+  #65"), 226 archived tasks (was "~200").
+
+### Known defects, published rather than repaired
+
+- Two of the four metrics in `adp_metrics.py` report **false zeros**: the check-catch parser
+  looks for a verdict token this install never writes, and the miss parser reads the working
+  file while 121 ledgered entries sit in an archive it never opens. The measurement layer
+  drifted from the conventions it measures. `MEASUREMENT.md` predicted exactly this.
+- `adp_claims.py` was **wrong on its first run** — a malformed pattern returned 59 where the
+  true figure was 422, silently — and was caught only by an independent check. Recorded here
+  because the protocol's own argument applies to its instruments.
+
 ## [1.1.5] — 2026-06-18 (install-feedback fixes)
 
 Patch release. **The 1.1 spec is unchanged.** From real install feedback.
