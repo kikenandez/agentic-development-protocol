@@ -1,6 +1,7 @@
 # Agentic Development Protocol (ADP)
 
-[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21982389-1682D4.svg)](https://doi.org/10.5281/zenodo.21982389)
+[![Paper DOI](https://img.shields.io/badge/paper-10.5281%2Fzenodo.21982389-1682D4.svg)](https://doi.org/10.5281/zenodo.21982389)
+[![Software DOI](https://img.shields.io/badge/software-10.5281%2Fzenodo.22062353-1682D4.svg)](https://doi.org/10.5281/zenodo.22062353)
 [![Code: MIT](https://img.shields.io/badge/code-MIT-blue.svg)](./LICENSE-CODE-MIT.txt)
 [![Docs: CC BY 4.0](https://img.shields.io/badge/docs-CC%20BY%204.0-lightgrey.svg)](./LICENSE-DOCS-CC-BY-4.0.txt)
 
@@ -115,7 +116,19 @@ until a *second* project reproduces them (n=2). See [`ROADMAP.md`](./ROADMAP.md)
 
 ## Citing ADP
 
-If ADP is useful to you, cite the preprint:
+Two things can be cited, and they are different objects.
+
+**The protocol itself** — cite this if you installed or ran it:
+
+> Blanco, G. (2026). *The Agentic Development Protocol* [Computer software]. Zenodo.
+> https://doi.org/10.5281/zenodo.22062353
+
+That DOI always resolves to the newest release, so it stays correct as the protocol
+evolves. To pin a specific version, use its own DOI instead — v1.1.6 is
+`10.5281/zenodo.22062354`. Releases are also archived in
+[Software Heritage](https://www.softwareheritage.org/) and indexed by OpenAIRE.
+
+**The paper** — cite this if you are engaging with the argument or the evidence:
 
 > Blanco, G. (2026). *The Agentic Development Protocol: A Self-Falsifying Process
 > Standard for Shipping Production Software with AI Agent Teams* (v0.5) [Preprint].

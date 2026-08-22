@@ -17,6 +17,8 @@ authors:
 repository-code: "https://github.com/kikenandez/agentic-development-protocol"
 url: "https://adp.avapmo.com"
 license: MIT
+version: "1.1.6"
+date-released: "2026-08-22"
 keywords:
   - agentic AI
   - AI coding agents
@@ -28,10 +30,20 @@ keywords:
   - developer tooling
   - production software
   - replication
+doi: "10.5281/zenodo.22062353"
 identifiers:
+  - type: doi
+    value: "10.5281/zenodo.22062353"
+    description: "Concept DOI — always resolves to the latest release of the protocol"
+  - type: doi
+    value: "10.5281/zenodo.22062354"
+    description: "Release v1.1.6"
   - type: doi
     value: "10.5281/zenodo.21982389"
     description: "Preprint describing the protocol (v0.5, August 2026)"
+  - type: swh
+    value: "swh:1:dir:5f45b26603bb047229539aa3030acd7f673d24ab"
+    description: "Software Heritage archive of release v1.1.6"
 preferred-citation:
   type: article
   title: >-
