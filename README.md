@@ -24,7 +24,7 @@ re-runnable script against a pinned commit.
 
 | Path | What it is |
 |------|-----------|
-| [`current/`](./current/) | The ratified **ADP 1.1** bundle (tooling **1.1.5**) — spec, scripts, and the template ADP installs into your repo. **Start here.** |
+| [`current/`](./current/) | The ratified **ADP 1.1** bundle (tooling **1.1.6**) — spec, scripts, and the template ADP installs into your repo. **Start here.** |
 | [`current/PROTOCOL.md`](./current/PROTOCOL.md) | The canonical specification. Read this first. |
 | [`current/template/`](./current/template/) | The files ADP installs into a target repository. |
 | [`MEASUREMENT.md`](./MEASUREMENT.md) | How every number ADP publishes about itself is counted. |
@@ -108,7 +108,7 @@ is a result we want published too.
 
 ## Roadmap
 
-**Spec 1.1 is the current stable standard** (tooling 1.1.5). A set of **1.2 candidate
+**Spec 1.1 is the current stable standard** (tooling 1.1.6). A set of **1.2 candidate
 deltas** is in pilot — one cut a production system's live context ~85%, one was
 pruned for being unadopted ceremony. Per ADP's own rule, none graduate into the spec
 until a *second* project reproduces them (n=2). See [`ROADMAP.md`](./ROADMAP.md) and

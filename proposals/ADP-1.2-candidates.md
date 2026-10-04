@@ -131,6 +131,12 @@ Per-candidate n=2 signal (deterministic-stack second occurrence):
   PLAN-side verification pillar. A pre-registered question is on the review table:
   does it graduate now (n=1-install exception) or run the second install's own
   measurement window first.
+- **#5, single-source-engine leg — UPDATE (protocol review run 2, 2026-10-02).**
+  The n=1 install recorded **5 ESCAPED instances, 3 of them reaching production**,
+  of a second derivation of one capability drifting from the first
+  (2026-09-19 → 10-02). Repeated incidents on **one install**: stronger evidence for
+  the leg, not a graduation. Receipt:
+  [`evidence/protocolreview_run2_webapp_2026-10-02.md`](../evidence/protocolreview_run2_webapp_2026-10-02.md).
 
 ## First candidate at n=2: explicit-pathspec commits
 
@@ -198,10 +204,21 @@ candidates awaiting their own n=2:
    "two lanes touched one file" is **two** failure modes — content *lost* vs
    content *mislabelled* — and partitioning fixes only the first.
 
+## From protocol review run 2 (2026-10-02; n=1 by install)
+
+4. **Plugin-aware precedence** *(extends the layered-rules precedence clause).*
+   Installed plugins issue rules through hooks and skills that no protocol layer
+   lists — one blocked a commit call on the night it was found. Rule: the
+   precedence clause names plugins explicitly, and the install keeps a host table
+   of the hooks that fire (event, matcher, what it blocks). Folded into
+   `protocolreview.md` step 3c as a review check; awaiting a second install for
+   the spec.
+
 ## Promotion gate
 
 Each graduate-candidate enters `PROTOCOL.md` as **1.2** only when a **second
 independent project (n=2)** reproduces its win, carrying the caveats above. Until
-then this stays a proposal and the spec stays **1.1**. *(Status 2026-08-08: the
-pathspec-commit delta above is the first to clear the gate; the second install's
-forward measurement window — the blocker for the rest — has not yet started.)*
+then this stays a proposal and the spec stays **1.1**. *(Status 2026-10-02: the
+pathspec-commit delta above is still the only one to clear the gate; no result
+from the second install's forward measurement window — the blocker for the rest —
+is recorded yet. Protocol review run 2 added evidence on one install and graduates nothing.)*

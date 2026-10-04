@@ -26,6 +26,27 @@ without their own bump.
 - **`current/scripts/adp_ledger_migrate.py`** — converts a prose miss ledger into
   `misses.yml`, one record per numbered miss. Reports field coverage honestly and
   leaves absent fields null rather than guessed.
+- **`evidence/protocolreview_run2_webapp_2026-10-02.md`** — install report for the
+  second protocol review on the source install: which steps fired, with receipts.
+
+### Changed
+
+- **`protocolreview.md` → v0.2**, folding run 2's findings: an effort row beside the
+  rework rate (step 1); plugins as a rules layer, with a host table of hooks (3c);
+  citations counted by name as well as number (3d); size targets for every standing
+  memory file and a status census (4); research reports verified at source (5); new
+  rules need ESCAPED instances and a reject-bound, and decisions go to the owner as
+  three packages (6). Still n=1 by install — two runs, one install.
+- **`proposals/ADP-1.2-candidates.md`** — run 2 receipt on candidate #5 (5 ESCAPED
+  instances of a drifting second derivation, 3 to production); new candidate:
+  plugin-aware precedence. Nothing graduates.
+- **Version markers aligned on 1.1.6** — `README.md`, `ROADMAP.md` and the installed
+  `.agentic-protocol/VERSION` still said 1.1.5.
+- **Install names removed from public files** — installs are referred to by stack
+  (web application, embedded C++), as in `evidence/`.
+- **`ADP-1.2-PROPOSAL.md`** — Stockfish claims now cite the public repository and its
+  fishtest records instead of an unpublished review; `protocolreview.md` drops the
+  same companion-doc reference.
 
 ### Corrected
 

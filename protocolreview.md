@@ -1,8 +1,10 @@
 # The Protocol Review — a recurring improvement ritual for ADP installs
 
-**Status:** TOOL, v0.1 — extracted 2026-08-20 from a full review run on the n=1
-production install (the web application). One complete execution; every step below carries
-a receipt from that run. Portable by design; graded honestly where it is not.
+**Status:** TOOL, v0.2 — extracted 2026-08-20 from a full review run on the n=1
+production install (the web application); revised 2026-10-02 after a second run on the
+same install ([run 2 report](evidence/protocolreview_run2_webapp_2026-10-02.md)). Two
+executions, **one install** — still n=1 by install. Every step carries a receipt;
+v0.2 additions are marked *(v0.2)*. Portable by design; graded honestly where it is not.
 **Companion docs:** `proposals/ADP-1.2-candidates.md` (what a review can graduate),
 `proposals/semantic-verification-checklist.md` (a review import that reached n=2).
 
@@ -43,6 +45,17 @@ per-miss cost, the signature of better detection, and nearly read it as decline.
 > verdict was "detection healthy, recall failing" — the opposite of what the
 > raw count suggested.
 
+*(v0.2)* **Put an EFFORT row beside the catch row.** A low escape count says only
+that few escapes were *recorded*; on an inconsistently kept ledger it cannot carry a
+"≈ 0 rework" verdict on its own. State the cost of catching alongside it, from
+proxies the install already writes: spec premises falsified at the first gate,
+reports stopped without delivery, owner rulings per day.
+
+> Receipt (run 2, 2026-10-02): 11 ledger entries, 1 ESCAPED (a record defect), none
+> recorded as shipped wrong code. The owner rejected "≈ 0" as exceeding the
+> evidence; the effort row read 17 of 358 lane entries falsified at gate 1,
+> 4 stopped-without-delivery reports, 72 owner rulings in 8 days.
+
 ### 2. Family analysis — fix at the ACT, not the artifact
 
 Group the window's misses by recurring shape. For each family ask: **where does
@@ -76,7 +89,7 @@ with date, reason, and where their mechanical checks went — never deleted).
 
 **(c) Contradiction scan — across ALL layers.** Enumerate every layer that issues
 rules to a session (project protocol · role prompts · user-global config ·
-org templates), then scan for the same topic ruled differently. Do it
+org templates · *(v0.2)* **installed plugins — their hooks and skills**), then scan for the same topic ruled differently. Do it
 mechanically: published evaluation work shows models *detect* instruction
 conflicts well but **silently pick a side rather than flagging them** — so an
 undetected contradiction does not announce itself, it just makes sessions
@@ -88,6 +101,16 @@ inconsistent.
 > default only where no project protocol exists.* That clause is the portable
 > fix for every layered-rules install.
 
+*(v0.2)* Plugins are a layer the protocol does not list but the session obeys:
+their hooks can block a tool call and their skills arrive with the authority of
+documentation. The precedence clause must **name plugins explicitly**, and the
+install keeps a **host table of the hooks that fire** (event, matcher, what it
+blocks). Where the host offers a mechanical prompt auditor, run it as this step's
+first pass — it does not replace the cross-layer read.
+> Receipt (run 2): the widened scan found plugin hooks and skills from three
+> plugins issuing rules the protocol had never enumerated; one blocked a commit
+> call the same night.
+
 **(d) Citation-decay disposal.** Each rule carries a citation baseline; each
 review counts *fresh* citations over material added since the previous review
 (`git log --since=<last review> --name-only`, grepped for the rule's citation
@@ -97,6 +120,11 @@ enforced by code (a hook, a script, a test) are exempt — the enforcement is th
 citation — and are the first candidates for absorbing into the mechanism's own
 documentation. This converts "the corpus should shrink" from a good intention
 into arithmetic (the Stockfish history-decay import, B3).
+*(v0.2)* **Count citations by name as well as by number.** Lanes cite rules by
+their name or shape, not only by number; a number-only grep under-reads.
+> Receipt (run 2, first window this check could fire): 4 rules uncited two windows
+> by number → 2 retired, 1 generalized, 1 kept with a recorded reason. The
+> by-name under-count was found in the same pass.
 
 ### 4. Memory-layer integrity — short-term and long-term
 
@@ -116,6 +144,12 @@ one-hop checks have twice reported alarming orphan counts that were actually zer
 > degrades every session that reads it — the user independently observed the
 > quality dip before the size was measured.
 
+*(v0.2)* **Every standing memory file gets a size target**, not only the dispatch
+file, and closed-task records are found by a **status census** across all task
+files — generators that skip DONE rows silently hide half-closed ones.
+> Receipt (run 2): an obligation ledger had reached 2,566 lines with no target;
+> the census found 4 half-closed task files the index generator had skipped.
+
 ### 5. External import scan
 
 Pick one high-discipline comparable (a mature OSS project, another ADP install,
@@ -131,6 +165,13 @@ don't transfer; its two-bounds-plus-inconclusive verdict shape does).
 > operator, S4 wrong argument rule) as sub-cases of an existing rule — no new
 > rule number minted.
 
+*(v0.2)* **Grade a research report against its source, not against itself.** A
+research subagent asked "what is new" will echo the install's own conventions back
+as new features. Verify each claimed import at the source before grading it.
+> Receipt (run 2): the host's changelog, June–October 2026, verified at source:
+> 5 real imports; the subagent's first pass had listed the install's own
+> conventions among them.
+
 ### 6. Fold and ratify — under subsume-or-don't
 
 Every change the review makes obeys the install's own ratification discipline:
@@ -140,6 +181,20 @@ on why both cheaper routes fail. Every ratification names its evidence (miss
 IDs, archive files, measured figures). Simplification work discovered by the
 review is **filed as first-class tasks** with the lighter prove-no-regression
 bar — never left as intentions.
+
+*(v0.2)* **A new rule needs ESCAPED instances and a reject-bound — never a count
+of caught lessons.** A strong shape without them becomes a `VERIFY` question in
+the relevant template, and earns a number only if it escapes again with that
+line in place.
+> Receipt (run 2): 0 numbers minted; the two strongest new shapes (5 and 6
+> ESCAPED instances) became template questions.
+
+*(v0.2)* **Take decisions to the owner as THREE PACKAGES**, with the tables as
+evidence behind them: (1) corrections ready to adopt; (2) policy choices; (3)
+bounded pilots — each with duration, success measure, retirement condition, and
+the ceremony it replaces. A flat list does not get adjudicated.
+> Receipt (run 2): 74 individual items were too many for the owner to
+> adjudicate as a flat list.
 
 ### 7. The handover ritual — the review ends in commits, not chat
 
@@ -162,13 +217,14 @@ next session boots from:
 
 ## Outputs checklist (what a completed review leaves behind)
 
-- [ ] Rework-rate stated for the window (escaped vs caught, separately)
+- [ ] Rework-rate stated for the window (escaped vs caught, separately), with an effort row beside it
 - [ ] Each recurring family matched to a fix AT THE ACT (or an explicit decision not to)
 - [ ] Rules home verified reachable; count derivable or ledger-reconstruction filed
-- [ ] Cross-layer contradiction scan run; each hit fixed or precedence-claused
-- [ ] Citation-decay pass run; every flagged rule disposed (retire/subsume/keep-with-reason)
-- [ ] Short-term memory at target size; long-term guards green; index regenerated in order
-- [ ] External imports graded with receipts; adopted ones ratified under subsume-or-don't
+- [ ] Cross-layer contradiction scan run, plugins included; each hit fixed or precedence-claused
+- [ ] Citation-decay pass run, by number AND name; every flagged rule disposed (retire/subsume/keep-with-reason)
+- [ ] Every standing memory file at its target size; status census run; long-term guards green; index regenerated in order
+- [ ] External imports verified at source and graded with receipts; adopted ones ratified under subsume-or-don't
+- [ ] Decisions taken to the owner as three packages (corrections · policy · bounded pilots)
 - [ ] Simplification tasks filed (not intended)
 - [ ] Handover committed: hashes, regenerated owed list, own-misses, next trigger
 
@@ -180,6 +236,8 @@ next session boots from:
 - If review outputs go **unadopted** (ratified mechanisms uncited by the next
   review), prune the step that produced them — the same un-adopted-ceremony bar
   that pruned the effort-band candidate in the 1.2 pilot.
-- n=1 caveat, stated per ADP's own promotion rule: this tool has run **once**.
-  A second install running it and reporting what fired — especially what did
-  NOT — is what graduates it. Open an install report either way.
+- n=1 caveat, stated per ADP's own promotion rule: this tool has run **twice,
+  on one install** (2026-08-20 and 2026-10-02). A second run on the same install
+  sharpens the steps; it does not graduate them. A second *install* running it
+  and reporting what fired — especially what did NOT — is what graduates it.
+  Open an install report either way.

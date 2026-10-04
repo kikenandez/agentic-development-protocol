@@ -3,7 +3,7 @@
 ADP versions the *standard*: `<spec-major>.<spec-minor>.<tooling-patch>` (see
 `CHANGELOG.md` → Versioning policy).
 
-## Current: spec **1.1**, tooling **1.1.5** (stable)
+## Current: spec **1.1**, tooling **1.1.6** (stable)
 
 `current/PROTOCOL.md` is the ratified 1.1 specification. The 1.1.x line has been
 hardened across multiple real installs (cross-platform installer, one-file
@@ -29,6 +29,12 @@ incidents on both installs (explicit-pathspec commits, `git commit -- <paths>`)
 and is ratifiable at the next spec pass. The n=1 install's five post-pilot weeks
 also upgraded two candidate caveats and contributed three new candidates — see
 `proposals/ADP-1.2-candidates.md`.
+
+**Status 2026-10-02.** A second protocol review on the n=1 install added receipts
+to candidate #5 and one new candidate (plugin-aware precedence); it graduates
+nothing, because both runs are on one install. No result from the second
+install's forward measurement window is recorded yet; that remains the blocker. The review tool itself moved to v0.2 —
+see [`protocolreview.md`](./protocolreview.md).
 
 One candidate was already **pruned** in the pilot for being unadopted ceremony —
 evidence the review mechanism isn't self-preserving.
