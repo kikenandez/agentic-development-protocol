@@ -43,7 +43,7 @@ from pathlib import Path
 # --------------------------------------------------------------------------
 # Verdict vocabulary
 #
-# Derived by reading the two live installs (nexus_pmo, XIAO_PlantSystem)
+# Derived by reading the two live installs (web application, embedded C++)
 # rather than from the protocol text, because the installs are the ground
 # truth for what actually gets written. Where an install uses a phrasing not
 # listed here, it is invisible to this script — see report section 4.

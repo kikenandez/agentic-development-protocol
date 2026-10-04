@@ -1,7 +1,7 @@
 # The Protocol Review — a recurring improvement ritual for ADP installs
 
 **Status:** TOOL, v0.1 — extracted 2026-08-20 from a full review run on the n=1
-production install (nexus_pmo). One complete execution; every step below carries
+production install (the web application). One complete execution; every step below carries
 a receipt from that run. Portable by design; graded honestly where it is not.
 **Companion docs:** `proposals/ADP-1.2-candidates.md` (what a review can graduate),
 `stockfish-ideas-for-adp.md` (the external-import method, worked),

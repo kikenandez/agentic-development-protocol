@@ -26,6 +26,7 @@ Full excerpts can be provided to a reviewer or editor on request, under the usua
 | `claim_receipts_webapp_2026-08-17.md` | The same receipts as a readable table, grouped by verdict class |
 | `claim_receipts_embedded_cpp_2026-08-17.md` | The cross-install run. Near-empty by design — see below |
 | `history_analysis_webapp_2026-08-19.md` | Source-control analysis: corpus composition, churn distribution, commit cadence, convention adherence |
+| `protocolreview_run2_webapp_2026-10-02.md` | Install report for the second run of [`protocolreview.md`](../protocolreview.md) on the source install: which steps fired, with receipts, and candidate v0.2 changes |
 
 ## The runs these came from
 
