@@ -4,7 +4,6 @@
 production install (the web application). One complete execution; every step below carries
 a receipt from that run. Portable by design; graded honestly where it is not.
 **Companion docs:** `proposals/ADP-1.2-candidates.md` (what a review can graduate),
-`stockfish-ideas-for-adp.md` (the external-import method, worked),
 `proposals/semantic-verification-checklist.md` (a review import that reached n=2).
 
 ---
