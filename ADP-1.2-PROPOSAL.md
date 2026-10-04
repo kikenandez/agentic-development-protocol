@@ -3,7 +3,7 @@
 **Version target:** 1.2
 **Status:** PROPOSED — not yet ratified. Keep `PROTOCOL.md` at 1.1 until these are accepted.
 **Date:** 2026-06-20
-**Source DNA:** A code review of an external exemplar — `official-stockfish/stockfish` (master) — whose entire culture is ADP's own thesis taken to its limit: *nothing merges on opinion; every change is gated by a measured number.* Plus first principles. See `stockfish-ideas-for-adp.md` for the underlying review.
+**Source DNA:** A code review of an external exemplar — `official-stockfish/stockfish` (master) — whose entire culture is ADP's own thesis taken to its limit: *nothing merges on opinion; every change is gated by a measured number.* Plus first principles. The underlying review reads the public repository directly: `src/search.cpp`, `src/tt.h`, `CONTRIBUTING.md`, the commit log, and the linked fishtest runs at tests.stockfishchess.org.
 
 **Honest grade up front.** Every change below is **candidate, n=1 by analysis** — derived from one external exemplar and sound principle, not from ADP production receipts the way §1–§15 of `PROTOCOL.md` are. This is the same posture as the existing §16 scaling extensions. None is binding until the retrospective (§6.11) promotes it at n=2 from real use. The proposal is written so each delta is independently acceptable or rejectable — adopt the cheap, high-impact ones first and let the rest earn their place.
 
@@ -201,4 +201,4 @@ None of these is large individually; the risk is interaction, so implement and r
 
 ---
 
-*This proposal is candidate 1.2 material, n=1 by analysis. It composes with the existing §16 scaling extensions (also candidate 1.2). The retrospective (§6.11) is the loop that promotes, refines, or retires each delta from real production use. Grounding for every Stockfish claim is in `stockfish-ideas-for-adp.md` and the cited `src/` files.*
+*This proposal is candidate 1.2 material, n=1 by analysis. It composes with the existing §16 scaling extensions (also candidate 1.2). The retrospective (§6.11) is the loop that promotes, refines, or retires each delta from real production use. Every Stockfish claim is grounded in the public `official-stockfish/stockfish` repository (the cited `src/` files, `CONTRIBUTING.md` and commit history) and its fishtest records at tests.stockfishchess.org.*
