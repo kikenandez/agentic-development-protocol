@@ -36,31 +36,33 @@ try {
   try { cmd = JSON.parse(raw || '{}')?.tool_input?.command || ''; } catch { cmd = raw || ''; }
   if (!cmd.includes('git')) process.exit(0);
 
-  // Un-quote flag-like tokens first ("-A", '.', ":/", "*"), so quoting a flag can't
-  // hide it; THEN strip remaining quoted substrings so a commit MESSAGE can't trip
-  // the structural rules.
+  // Normalise like the shell would, so quoting can't hide a flag yet a commit
+  // MESSAGE can't trip the rules: drop backslash escapes (\-A -> -A); then, left
+  // to right, a quoted span WITHOUT whitespace is just a word -> unquote it
+  // ("-A", -"A", '.', ad''d); a span WITH whitespace (a message) -> placeholder.
   const s = cmd
-    .replace(/(['"])(-{1,2}[A-Za-z-]*|\.|:\/|\*)\1/g, '$2')
-    .replace(/'[^']*'/g, '').replace(/"[^"]*"/g, '');
+    .replace(/\\(.)/g, '$1')
+    .replace(/'([^']*)'|"([^"]*)"/g, (_, a, b) => { const t = a ?? b ?? ''; return /\s/.test(t) ? ' Q ' : t; });
 
-  // `git` + optional global options (-C dir, -c k=v, --git-dir=…) before the subcommand.
-  const G = String.raw`(^|[\s;&|(])git(\s+(-[cC]\s+\S+|--[\w-]+(=\S+)?))*\s+`;
+  // `git` (any path prefix: /usr/bin/git, `git, $(git) + optional global options
+  // (-C dir, -c k=v, -p, --git-dir=…) before the subcommand.
+  const G = String.raw`(^|[^\w.-])git(\s+(-[cC]\s+\S+|-[a-zA-Z]+|--[\w-]+(=\S+)?))*\s+`;
   // Any args of the SAME command (stops at ; & | so a later command can't match).
-  const ARGS = String.raw`([^\s;&|]+\s+)*`;
+  const ARGS = String.raw`([^\s;&|\x60]+\s+)*`;
   const re = (sub, tail) => new RegExp(G + sub + String.raw`(\s+` + ARGS + tail + ')');
 
   // §6.4 rule 1 — bulk staging -> DENY
-  if (re('add', String.raw`(-A|--all|\.|:/|\*)(\s|$|[;&|)])`).test(s))
+  if (re('add', String.raw`(-A|--all|\.|:/|\*)(\s|$|[;&|)\x60])`).test(s))
     emit('deny', "BLOCKED (ADP §6.4 rule 1): 'git add -A/./--all' bulk-stages the shared working tree and sweeps other sessions' files. Stage by exact path: git add <path1> <path2>. Need a file outside your lane? Write a handoff task.");
-  if (re('commit', String.raw`(-[a-zA-Z]*a[a-zA-Z]*|--all)(\s|$|[;&|)])`).test(s))
+  if (re('commit', String.raw`(-[a-zA-Z]*a[a-zA-Z]*|--all)(\s|$|[;&|)\x60])`).test(s))
     emit('deny', "BLOCKED (ADP §6.4 rule 1): 'git commit -a/--all' stages every tracked change. Stage by exact path first, then 'git commit -m'.");
 
   // §6.4 rule 4 + destructive-op -> ASK
   if (re('reset', String.raw`--hard`).test(s))
     emit('ask', "CONFIRM (ADP §6.4 rule 4): 'git reset --hard' discards work irreversibly. Prefer --soft/--mixed; 'git stash' first if you must. Authorize this instance?");
-  if (re('push', String.raw`(--force(-with-lease)?(=\S+)?|-[a-zA-Z]*f[a-zA-Z]*|\+\S+)(\s|$|[;&|)])`).test(s))
+  if (re('push', String.raw`(--force(-with-lease)?(=\S+)?|-[a-zA-Z]*f[a-zA-Z]*|\+\S+)(\s|$|[;&|)\x60])`).test(s))
     emit('ask', "CONFIRM: force-push rewrites remote history. Authorize this instance?");
-  if (re('branch', String.raw`(-D|-[a-zA-Z]*D[a-zA-Z]*|--delete\s+--force|--force\s+--delete)(\s|$|[;&|)])`).test(s))
+  if (re('branch', String.raw`(-D|-[a-zA-Z]*D[a-zA-Z]*|--delete\s+--force|--force\s+--delete)(\s|$|[;&|)\x60])`).test(s))
     emit('ask', "CONFIRM: 'git branch -D' force-deletes a branch (may drop unmerged work). Authorize this instance?");
 
   // §6.4 rule 2 — surface the staged set at every commit -> ALLOW + context

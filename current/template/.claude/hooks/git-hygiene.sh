@@ -40,19 +40,22 @@ emit() { # $1=decision $2=reason [$3=additionalContext]
   exit 0
 }
 
-# Un-quote flag-like tokens first ("-A", '.', ":/", "*") so quoting a flag can't
-# hide it; THEN strip remaining quoted substrings so commit messages can't trip
-# the structural patterns.
-STRIPPED="$(printf '%s' "$CMD" \
-  | sed -E "s/'(-{1,2}[A-Za-z-]*|\.|:\/|\*)'/\1/g; s/\"(-{1,2}[A-Za-z-]*|\.|:\/|\*)\"/\1/g" \
-  | sed "s/'[^']*'//g; s/\"[^\"]*\"//g")"
+# Normalise like the shell would, so quoting can't hide a flag yet a commit
+# MESSAGE can't trip the rules: drop backslash escapes (\-A -> -A); then, left
+# to right, a quoted span WITHOUT whitespace is just a word -> unquote it
+# ("-A", -"A", '.', ad''d); a span WITH whitespace (a message) -> placeholder.
+# (Same algorithm as git-hygiene.mjs, done in jq so both twins agree.)
+STRIPPED="$(printf '%s' "$INPUT" | jq -r '(.tool_input.command // "")
+  | gsub("\\\\(?<c>.)"; .c)
+  | gsub("'"'"'(?<a>[^'"'"']*)'"'"'|\"(?<b>[^\"]*)\""; ((.a // .b // "") as $t | if ($t|test("\\s")) then " Q " else $t end))' 2>/dev/null || printf '%s' "$CMD")"
 
-# `git` + optional global options (-C dir, -c k=v, --git-dir=…) + <sub> + args of
-# the SAME command (stops at ; & | so a later command can't match) + <tail>.
+# `git` (any path prefix: /usr/bin/git, `git, $(git) + optional global options
+# (-C dir, -c k=v, -p, --git-dir=…) + <sub> + args of the SAME command (stops at
+# ; & | so a later command can't match) + <tail>.
 SP='[[:space:]]'
-G="(^|[[:space:];&|(])git($SP+(-[cC]$SP+[^[:space:]]+|--[[:alnum:]_-]+(=[^[:space:]]+)?))*$SP+"
-ARGS="([^[:space:];&|]+$SP+)*"
-END="($SP|\$|[;&|)])"
+G="(^|[^[:alnum:]_.-])git($SP+(-[cC]$SP+[^[:space:]]+|-[a-zA-Z]+|--[[:alnum:]_-]+(=[^[:space:]]+)?))*$SP+"
+ARGS="([^[:space:];&|\`]+$SP+)*"
+END="($SP|\$|[;&|)\`])"
 has() { printf '%s' "$STRIPPED" | grep -Eq "${G}$1($SP+${ARGS}$2)"; }
 
 # §6.4 rule 1 — bulk staging -> DENY

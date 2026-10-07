@@ -21,6 +21,16 @@ CASES = [
     ("git commit -a -m wip", "deny"),
     ('git commit "-a" -m x', "deny"),
     ("git commit --all -m x", "deny"),
+    ("/usr/bin/git add -A", "deny"),     # path-prefixed binary (regression guard)
+    ("echo `git add -A`", "deny"),       # backtick substitution (regression guard)
+    ("x=$(git add .)", "deny"),
+    ('git add -"A"', "deny"),            # partially quoted flag
+    ("git add \\-A", "deny"),            # backslash-escaped flag
+    ("git ad''d -A", "deny"),            # empty quotes inside the subcommand
+    ("git -p add -A", "deny"),           # single-letter global option
+    ("git --no-pager add --all", "deny"),
+    ('git commit -m "fix: a; b && c" -a', "deny"),   # message with separators, then -a
+    ("git commit -m \"don't stage\" -a", "deny"),    # apostrophe inside double quotes
     ("git reset --hard HEAD~1", "ask"),
     ("git -C /x reset --hard", "ask"),
     ("git push --force", "ask"),
@@ -40,6 +50,10 @@ CASES = [
     ("git branch -d merged", "none"),
     ("git reset --soft HEAD~1", "none"),
     ("ls -la", "none"),
+    ("git add 'my file.c' docs/x.md", "none"),
+    ('git commit -m "stage with git add -A next time"', "allow"),
+    ("legit add -A", "none"),             # 'git' inside another word
+    ("cat .git add -A", "none"),
 ]
 
 def run(hook, cmd):

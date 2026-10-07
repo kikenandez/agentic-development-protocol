@@ -57,8 +57,14 @@ without their own bump.
   `git -c k=v add --all`) skipped the rules. Also missed: `.` after a real path,
   `:/`, `*`, a `+ref` force push, and `-C` before `reset --hard`. Flag-like quoted
   tokens are now un-quoted before the strip. Global options are allowed, args are
-  scanned only up to `;`/`&`/`|`. `scripts/test_git_hygiene.py`: 33 cases × both
-  twins (the old hooks fail 10 of them each).
+  scanned only up to `;`/`&`/`|`. Second pass (same day, after review): the
+  first fix's `git` boundary missed `/usr/bin/git` and backtick/`$( )`
+  substitutions (a regression), and partially quoted or escaped flags (`-"A"`,
+  `\-A`, `ad''d`) and single-letter global options (`git -p`) still got through.
+  Now quoting is normalised the way the shell does it: backslash escapes are
+  dropped, a quoted span with no whitespace is unquoted, and a span with
+  whitespace (a message) becomes a placeholder. Both twins use the same algorithm
+  (jq `gsub` in `.sh`). `scripts/test_git_hygiene.py`: 47 cases × both twins.
 - **`stop-cleanup.mjs` shell injection.** Worktree paths from
   `git worktree list` were put into an `execSync` shell string, so a crafted
   `*-adp-tmp-*` worktree name containing `"`/`$(…)` would run code. It now uses
