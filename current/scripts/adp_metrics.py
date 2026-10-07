@@ -78,6 +78,13 @@ def main() -> int:
         if not m:
             continue
         close = parse_date(m.group(1))
+        # The filename date can precede the commit that actually lands the archive
+        # (late-night closes, next-day archive commits). Use the later of the two so
+        # the closing commits themselves never count as rework.
+        added = parse_date(sh(["git", "log", "--diff-filter=A", "--format=%as", "-1", "--",
+                               str(f.relative_to(root))], root).strip() or "")
+        if close and added and added > close:
+            close = added
         if close is None or (since and close < since):
             continue
         n_archives += 1
@@ -102,6 +109,8 @@ def main() -> int:
         d = parse_date(d_str)
         if d is None:
             continue
+        if re.match(r"docs(\([^)]*\))?:\s*archive\b", msg, re.I):
+            continue  # archiving a task is closing it, not reworking it
         for tm in re.finditer(r"\bT(\d+[a-z]?)\b", msg, re.I):
             tid = "t" + tm.group(1).lower()
             if tid in closes and d > closes[tid]:

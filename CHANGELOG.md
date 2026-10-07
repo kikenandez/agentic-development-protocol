@@ -75,6 +75,11 @@ without their own bump.
 
 ### Fixed
 
+- **`adp_metrics.py` rework overcount.** The close date came from the archive
+  filename, so archive commits landing the next day counted as rework (an
+  embedded C++ install showed 6% where the true rate was 2%). The close date is now
+  the later of the filename date and the commit that added the archive, and
+  `docs: archive …` commits are never counted as rework.
 - **`current/scripts/wire-sync.sh` crashed on any repo with tasks** —
   `format_task_line` was called before it was defined (`NameError`), so
   `tasks.wire` was never written and the Stop hook silently failed. Function
