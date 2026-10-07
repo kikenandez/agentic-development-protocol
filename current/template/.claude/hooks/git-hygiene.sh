@@ -40,30 +40,42 @@ emit() { # $1=decision $2=reason [$3=additionalContext]
   exit 0
 }
 
-# Strip quoted substrings so commit messages can't trip the structural patterns.
-STRIPPED="$(printf '%s' "$CMD" | sed "s/'[^']*'//g; s/\"[^\"]*\"//g")"
+# Un-quote flag-like tokens first ("-A", '.', ":/", "*") so quoting a flag can't
+# hide it; THEN strip remaining quoted substrings so commit messages can't trip
+# the structural patterns.
+STRIPPED="$(printf '%s' "$CMD" \
+  | sed -E "s/'(-{1,2}[A-Za-z-]*|\.|:\/|\*)'/\1/g; s/\"(-{1,2}[A-Za-z-]*|\.|:\/|\*)\"/\1/g" \
+  | sed "s/'[^']*'//g; s/\"[^\"]*\"//g")"
+
+# `git` + optional global options (-C dir, -c k=v, --git-dir=…) + <sub> + args of
+# the SAME command (stops at ; & | so a later command can't match) + <tail>.
+SP='[[:space:]]'
+G="(^|[[:space:];&|(])git($SP+(-[cC]$SP+[^[:space:]]+|--[[:alnum:]_-]+(=[^[:space:]]+)?))*$SP+"
+ARGS="([^[:space:];&|]+$SP+)*"
+END="($SP|\$|[;&|)])"
+has() { printf '%s' "$STRIPPED" | grep -Eq "${G}$1($SP+${ARGS}$2)"; }
 
 # §6.4 rule 1 — bulk staging -> DENY
-if printf '%s' "$STRIPPED" | grep -Eq 'git[[:space:]]+add[[:space:]]+(-A([[:space:]]|$)|--all([[:space:]]|$)|\.([[:space:]]|$))'; then
+if has add "(-A|--all|\\.|:/|\\*)$END"; then
   emit deny "BLOCKED (ADP §6.4 rule 1): 'git add -A/./--all' bulk-stages the shared working tree and sweeps other sessions' files. Stage by exact path: git add <path1> <path2>. Need a file outside your lane? Write a handoff task."
 fi
-if printf '%s' "$STRIPPED" | grep -Eq 'git[[:space:]]+commit[[:space:]]+(-a([[:space:]]|$)|-[a-zA-Z]*a[a-zA-Z]*[[:space:]]|--all([[:space:]]|$))'; then
+if has commit "(-[a-zA-Z]*a[a-zA-Z]*|--all)$END"; then
   emit deny "BLOCKED (ADP §6.4 rule 1): 'git commit -a/--all' stages every tracked change. Stage by exact path first, then 'git commit -m'."
 fi
 
 # §6.4 rule 4 + destructive-op -> ASK
-if printf '%s' "$STRIPPED" | grep -Eq 'git[[:space:]]+reset[[:space:]].*--hard'; then
+if has reset "--hard"; then
   emit ask "CONFIRM (ADP §6.4 rule 4): 'git reset --hard' discards work irreversibly. Prefer --soft/--mixed; 'git stash' first if you must. Authorize this instance?"
 fi
-if printf '%s' "$STRIPPED" | grep -Eq 'git[[:space:]]+push[[:space:]].*(--force([^-]|$)|--force-with-lease|-f([[:space:]]|$))'; then
+if has push "(--force(-with-lease)?(=[^[:space:]]+)?|-[a-zA-Z]*f[a-zA-Z]*|\\+[^[:space:]]+)$END"; then
   emit ask "CONFIRM: force-push rewrites remote history. Authorize this instance?"
 fi
-if printf '%s' "$STRIPPED" | grep -Eq 'git[[:space:]]+branch[[:space:]].*-D([[:space:]]|$)'; then
+if has branch "(-[a-zA-Z]*D[a-zA-Z]*|--delete$SP+--force|--force$SP+--delete)$END"; then
   emit ask "CONFIRM: 'git branch -D' force-deletes a branch (may drop unmerged work). Authorize this instance?"
 fi
 
 # §6.4 rule 2 — surface the staged set at every commit -> ALLOW + context
-if printf '%s' "$STRIPPED" | grep -Eq 'git[[:space:]]+commit([[:space:]]|$)'; then
+if printf '%s' "$STRIPPED" | grep -Eq "${G}commit($SP|\$)"; then
   STATUS="$(git status --short 2>/dev/null || echo '(git status unavailable)')"
   [ -z "$STATUS" ] && STATUS="(working tree clean — nothing staged?)"
   emit allow "git commit allowed; staged set surfaced for §6.4 rule 2 review." \

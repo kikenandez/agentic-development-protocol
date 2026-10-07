@@ -36,6 +36,7 @@ fi
 # 3. Release the freshness latch for this session
 INPUT="$(cat 2>/dev/null || echo '{}')"
 SESSION="$(printf '%s' "$INPUT" | jq -r '.session_id // ""' 2>/dev/null || echo "")"
+case "$SESSION" in (""|*[!A-Za-z0-9_-]*) SESSION="" ;; esac  # never a path fragment
 [ -n "$SESSION" ] && rm -f "/tmp/.adp-dispatch-ok-${SESSION}" 2>/dev/null
 
 exit 0

@@ -23,6 +23,7 @@ DISPATCH="${CLAUDE_PROJECT_DIR:-.}/docs/tasks/current.md"
 
 INPUT="$(cat 2>/dev/null || echo '{}')"
 SESSION="$(printf '%s' "$INPUT" | jq -r '.session_id // "nosession"' 2>/dev/null || echo nosession)"
+case "$SESSION" in (""|*[!A-Za-z0-9_-]*) SESSION="nosession" ;; esac  # never a path fragment
 LATCH="/tmp/.adp-dispatch-ok-${SESSION}"
 [ -f "$LATCH" ] && exit 0
 

@@ -33,6 +33,7 @@ try {
   const raw = await readStdin();
   let session = 'nosession';
   try { session = JSON.parse(raw || '{}')?.session_id || 'nosession'; } catch {}
+  if (!/^[A-Za-z0-9_-]{1,128}$/.test(session)) session = 'nosession'; // never a path fragment
   const latch = join(tmpdir(), `.adp-dispatch-ok-${session}`);
   if (existsSync(latch)) process.exit(0);
 

@@ -48,6 +48,25 @@ without their own bump.
   fishtest records instead of an unpublished review; `protocolreview.md` drops the
   same companion-doc reference.
 
+### Security
+
+- **`git-hygiene.{sh,mjs}` guard bypasses (parser differential).** The hook
+  stripped every quoted substring before matching, so a quoted flag
+  (`git add "-A"`, `git add '.'`, `git commit "-a"`) vanished, and any global
+  option between `git` and the subcommand (`git -C . add -A`,
+  `git -c k=v add --all`) skipped the rules. Also missed: `.` after a real path,
+  `:/`, `*`, a `+ref` force push, and `-C` before `reset --hard`. Flag-like quoted
+  tokens are now un-quoted before the strip. Global options are allowed, args are
+  scanned only up to `;`/`&`/`|`. `scripts/test_git_hygiene.py`: 33 cases × both
+  twins (the old hooks fail 10 of them each).
+- **`stop-cleanup.mjs` shell injection.** Worktree paths from
+  `git worktree list` were put into an `execSync` shell string, so a crafted
+  `*-adp-tmp-*` worktree name containing `"`/`$(…)` would run code. It now uses
+  `execFileSync` (argv, no shell) everywhere.
+- **Session-id path fragment.** `session_id` was put into `/tmp` latch paths
+  unchecked in `stop-cleanup` and `dispatch-freshness` (both twins). It is now
+  validated against `[A-Za-z0-9_-]`.
+
 ### Fixed
 
 - **`current/scripts/wire-sync.sh` crashed on any repo with tasks** —
