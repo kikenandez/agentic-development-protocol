@@ -48,6 +48,21 @@ without their own bump.
   fishtest records instead of an unpublished review; `protocolreview.md` drops the
   same companion-doc reference.
 
+### Fixed
+
+- **`current/scripts/wire-sync.sh` crashed on any repo with tasks** —
+  `format_task_line` was called before it was defined (`NameError`), so
+  `tasks.wire` was never written and the Stop hook silently failed. Function
+  moved above its first use.
+- **`wire-sync.{sh,mjs}` only recognised `### T{N}:` task headings.** Installs
+  with other ID schemes (`WX.5`, `FND-FU.2`, `F1-FU.3`) got wrong rows, and
+  fields under any non-task `###` heading leaked into the previous task. Both
+  twins now accept `[A-Z][A-Za-z0-9]*` IDs with `.`/`-` segments, end a task
+  at any `##`/`###` heading, and skip stubs whose title says `ARCHIVED`. The
+  ID is emitted verbatim (no forced `T` prefix). Both twins produce identical
+  output on a mixed-ID fixture. Found while upgrading the embedded C++ install
+  from L1 to L1–L4 (2026-10-07).
+
 ### Corrected
 
 - **The miss-ledger count.** Previously published as *121 entries, #7–#129*. The

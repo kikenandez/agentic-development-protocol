@@ -78,7 +78,7 @@ console.log(`WROTE  .adp/dispatch.wire  (${fs.statSync(join(adp, 'dispatch.wire'
 const tOut = ['; ADP tasks — wire v1.1 (auto-synced from docs/tasks/current.md)',
               '; T{N} | role | state | prio | plan-ref | inst-ref | acc-summary', ''];
 const fmt = (t) => {
-  const tid = 'T' + (t.id || '?');
+  const tid = t.id || '?';
   const role = (t.agent || '?').slice(0, 3);
   const state = (t.status || 'NEW').toUpperCase().slice(0, 8);
   const prio = t.priority || 'P2';
@@ -89,8 +89,13 @@ const fmt = (t) => {
 };
 let cur = null;
 for (const l of lines) {
-  const m = l.match(/^### T(\d+[a-z]?):\s+(.+?)$/);
-  if (m) { if (cur) tOut.push(fmt(cur)); cur = { id: m[1], title: m[2].trim() }; continue; }
+  // Task IDs: T{N} plus schemes like WX.5 / FND-FU.2; skip ARCHIVED stubs; any ##/### heading ends a task.
+  if (l.startsWith('## ') || l.startsWith('### ')) {
+    if (cur) tOut.push(fmt(cur)); cur = null;
+    const m = l.match(/^### ([A-Z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*):\s+(.+?)$/);
+    if (m && !m[2].includes('ARCHIVED')) cur = { id: m[1], title: m[2].trim() };
+    continue;
+  }
   if (cur) { const f = l.match(/^\s*-\s+\*\*(\w+):\*\*\s+(.+?)$/); if (f) cur[f[1].toLowerCase()] = f[2].trim(); }
 }
 if (cur) tOut.push(fmt(cur));

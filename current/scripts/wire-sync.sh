@@ -157,30 +157,8 @@ DISPATCH_OUT.write_text("\n".join(out))
 print(f"WROTE  {DISPATCH_OUT}  ({DISPATCH_OUT.stat().st_size} bytes)")
 
 # === Tasks sync ===
-# Extract every "### T{N}:" task and convert to one wire line each.
-task_re = re.compile(r'^### T(\d+[a-z]?):\s+(.+?)$')
-field_re = re.compile(r'^\s*-\s+\*\*(\w+):\*\*\s+(.+?)$')
-
-tasks_out = ["; ADP tasks — wire v1.1 (auto-synced from docs/tasks/current.md)",
-             "; T{N} | role | state | prio | plan-ref | inst-ref | acc-summary",
-             ""]
-
-current_task = None
-for line in lines:
-    m = task_re.match(line)
-    if m:
-        if current_task:
-            tasks_out.append(format_task_line(current_task))
-        current_task = {"id": m.group(1), "title": m.group(2).strip()}
-        continue
-    if current_task:
-        f = field_re.match(line)
-        if f:
-            key, val = f.group(1).lower(), f.group(2).strip()
-            current_task[key] = val
-
 def format_task_line(t):
-    tid   = "T" + t.get("id", "?")
+    tid   = t.get("id", "?")
     role  = (t.get("agent", "?")[:3])
     state = t.get("status", "NEW").upper()[:8]
     prio  = t.get("priority", "P2")
@@ -189,6 +167,33 @@ def format_task_line(t):
     inst  = f"inst@{plan}#{tid}" if plan != "-" else "-"
     acc   = "see-plan"
     return f"{tid:<6}| {role} | {state:<8} | {prio} | {plan} | {inst} | {acc}"
+
+# Extract every "### T{N}:" task and convert to one wire line each.
+# Task IDs: T{N} plus project schemes like WX.5 / FND-FU.2 / F1-FU.3. Stubs whose
+# title says ARCHIVED are skipped; any other ##/### heading ends the current task
+# (so fields under non-task headings never leak into the previous task).
+task_re = re.compile(r'^### ([A-Z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*):\s+(.+?)$')
+field_re = re.compile(r'^\s*-\s+\*\*(\w+):\*\*\s+(.+?)$')
+
+tasks_out = ["; ADP tasks — wire v1.1 (auto-synced from docs/tasks/current.md)",
+             "; T{N} | role | state | prio | plan-ref | inst-ref | acc-summary",
+             ""]
+
+current_task = None
+for line in lines:
+    if line.startswith("## ") or line.startswith("### "):
+        if current_task:
+            tasks_out.append(format_task_line(current_task))
+        current_task = None
+        m = task_re.match(line)
+        if m and "ARCHIVED" not in m.group(2):
+            current_task = {"id": m.group(1), "title": m.group(2).strip()}
+        continue
+    if current_task:
+        f = field_re.match(line)
+        if f:
+            key, val = f.group(1).lower(), f.group(2).strip()
+            current_task[key] = val
 
 # Don't forget the last task
 if current_task:
