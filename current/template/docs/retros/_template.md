@@ -68,6 +68,7 @@ Deterministic-clock fix status: _flagged / in progress / shipped_
 - Waivers this cycle: _count + brief_
 - Cadence: _holding ≤1/24h hard, target 3-7d / drift observed_
 - Any waiver that failed verification (→ tightens a gate)? _none / list_
+- Any automation running unattended (Stop hook, scheduled task, L4 loop): how many supervised runs did it have before it ran alone, and what did its last deviation change? _n/a / list_ (a VERIFY question, not a rule — 2026-10 import scan)
 
 ## 8. Token economy
 

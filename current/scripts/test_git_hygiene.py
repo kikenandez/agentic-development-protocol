@@ -56,20 +56,55 @@ CASES = [
     ("cat .git add -A", "none"),
 ]
 
-def run(hook, cmd):
+def run(hook, cmd, env=None):
     payload = json.dumps({"tool_input": {"command": cmd}})
     argv = ["bash", str(H / "git-hygiene.sh")] if hook == "sh" else ["node", str(H / "git-hygiene.mjs")]
-    out = subprocess.run(argv, input=payload, capture_output=True, text=True, timeout=10).stdout.strip()
+    p = subprocess.run(argv, input=payload, capture_output=True, text=True, timeout=10, env=env)
+    out = p.stdout.strip()
     if not out:
-        return "none"
-    return json.loads(out)["hookSpecificOutput"]["permissionDecision"]
+        return "none", ""
+    o = json.loads(out)["hookSpecificOutput"]
+    return o["permissionDecision"], o.get("additionalContext", "")
 
 fails = 0
 for cmd, want in CASES:
     for hook in ("sh", "mjs"):
-        got = run(hook, cmd)
+        got, _ = run(hook, cmd)
         if got != want:
             fails += 1
             print(f"FAIL [{hook}] {cmd!r}: want {want}, got {got}")
-print(f"{len(CASES) * 2 - fails}/{len(CASES) * 2} passed")
+
+# §6.4 rule 1, pathspec form (n=2): a commit WITHOUT `-- <paths>` is allowed but
+# the injected context must say so; a commit WITH a pathspec must not nag.
+PATHSPEC_CASES = [
+    ('git commit -m "x"', True),
+    ("git commit -F msg.txt -- a.c b.c", False),
+    ('git commit -m "x" -- docs/a.md', False),
+    ('git commit -m "x -- not a pathspec"', True),   # inside the message only
+]
+for cmd, want_note in PATHSPEC_CASES:
+    for hook in ("sh", "mjs"):
+        dec, ctx = run(hook, cmd)
+        has_note = "No pathspec" in ctx
+        if dec != "allow" or has_note != want_note:
+            fails += 1
+            print(f"FAIL [{hook}] pathspec {cmd!r}: want allow note={want_note}, got {dec} note={has_note}")
+
+# Fail VISIBLE without jq: the .sh twin must ASK on a git command, not no-op.
+import os, shutil, tempfile
+shim = Path(tempfile.mkdtemp(prefix="adp-nojq-"))
+for tool in ("bash", "grep", "git", "sed", "cat", "date", "stat"):
+    src = shutil.which(tool)
+    if src:
+        os.symlink(src, shim / tool)
+nojq = {**os.environ, "PATH": str(shim)}
+assert shutil.which("jq", path=str(shim)) is None, "shim PATH still finds jq"
+for cmd, want in [("git add -A", "ask"), ("git commit -m x", "ask"), ("ls -la", "none")]:
+    got, _ = run("sh", cmd, env=nojq)
+    if got != want:
+        fails += 1
+        print(f"FAIL [sh, no jq] {cmd!r}: want {want}, got {got}")
+
+total = len(CASES) * 2 + len(PATHSPEC_CASES) * 2 + 3
+print(f"{total - fails}/{total} passed")
 sys.exit(1 if fails else 0)

@@ -4,6 +4,7 @@
 **Status:** PROPOSED | IN PROGRESS | DONE
 **Branch:** (if applicable; otherwise "main")
 **Owner:** architect
+**Supersedes:** (plan, task or decision this plan retires — delete this line when none)
 
 ---
 

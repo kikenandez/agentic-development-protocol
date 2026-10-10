@@ -177,6 +177,8 @@ The 2026 cost ratios on the Claude API: Haiku $1 / $5 per 1M tokens (input/outpu
 
 **The subagent gotcha.** When roles ship as Claude Code subagents (§8.1), the `model:` resolution order is env var > frontmatter > inherit from parent. The default is *inherit*, not Haiku. If you do not pin `model:` explicitly in each subagent's frontmatter, your cheap reviewer silently runs on Opus and your bill explodes. Always pin.
 
+**Locate, don't extract (the direction of delegation).** A cheap tier may *locate* — which file, which symbol, which line anchor — but a value, count or list it hands back is a **pointer, not a fact**: the tier that owns the verdict re-reads it at the source. A summarising small model drops lines without saying so, and a count from a filtered tool is the S6 wrong-cardinality class (`proposals/semantic-verification-checklist.md`). This line indexes two existing checks rather than adding one: the research-report rule in the protocol review (step 5: *verify each claimed import at the source*) and S6. *(Added 2026-10: §5.3 said which tier, never what a tier may return.)*
+
 > **Perishability note (dated 2026-06).** Model names, prices, and tier boundaries in this table — and the pinned `model:` strings in the template's `.claude/agents/*.md` — rot faster than any other content in this protocol. Re-verify them against the provider's current pricing page at every retro (§6.11, token-economy input); what survives model generations is the *tiering principle* (expensive model for cross-cutting judgment, mid-tier for implementation, cheap tier for mechanical verification), not the names.
 
 ---
@@ -240,22 +242,25 @@ Three rules: keep it to 3-5 tasks per session, list explicit "do not start" entr
 - **Plan:** docs/plans/{relevant}.md (if applicable)
 - **Priority:** P0 | P1 | P2 | P3
 - **Created:** YYYY-MM-DD
+- **Supersedes:** T{M} | plan {slug} | rule k | none  (only when this task retires an earlier decision)
 
 **Instruction:** What to do — specific files, functions, line numbers.
 **What NOT to change:** Explicit guard rails.
 **Acceptance criteria:**
 - [ ] Concrete verification step
 
-**Result:** (filled by executing agent: what was done, commit hash, issues found)
+**Result:** (filled by executing agent: what was done, commit hash, issues found. A number that will be reused carries its provenance — `[read: file:line, date]`, `[calc: expression]` or `[hyp: …]`; a calculation with a `hyp:` input is itself a hypothesis.)
 ```
 
 Sub-tasks use letter suffixes (T14a, T14b, T14c). Parent numbers are decided by the architect.
+
+Two fields are notations, not rules *(added 2026-10 — see `proposals/ADP-1.2-candidates.md`, import scan)*: **`Supersedes:`** answers "how does a decision make the previous one obsolete?" — without the pointer the next session resurfaces the retired decision; it is a field, filled only when there is something to retire. The **provenance tags** are the short form of the `⚠️ HYPOTHESIS` discipline for values rather than primitives; they compose with the claim receipts in `MEASUREMENT.md`, which record the same thing at ledger level.
 
 ### 6.4 Parallel-session commit hygiene — the five hard rules
 
 These are non-negotiable for any team running ≥2 sessions in parallel.
 
-1. **Stage by exact path, never bulk.** Never `git add -A` / `git add .` / `git commit -a`.
+1. **Stage by exact path, never bulk — and on a shared tree, commit by exact path too.** Never `git add -A` / `git add .` / `git commit -a`. Prefer `git commit -m "…" -- <path1> <path2>`: a bare `git commit` snapshots the **whole shared index**, so a parallel session's staged files are swept into your commit however carefully *you* staged — exact-path staging and a status check on the victim's side cannot prevent it. *(Pathspec form ratified at n=2 — independent sweep incidents on both installs, opposite stacks, 2026-08; generalised into this rule in place rather than numbered as a sixth. Obviated above worktree-per-session, required below it.)*
 2. **Always `git status --short` before every `git commit`.** The git index is process-shared — a parallel session's intermediate `git add` is visible to your `git commit` unless you check.
 3. **Verify "committed" claims.** When you write "code landed in `<hash>`", run `git branch --contains <hash>` first. Empty result = orphan commit = data-loss risk.
 4. **Never `git reset --hard` without a stash first.** Prefer `--soft` or `--mixed`.
@@ -264,11 +269,13 @@ These are non-negotiable for any team running ≥2 sessions in parallel.
 **Hook enforcement (new in 1.1).** On Claude Code, these rules are encoded as hooks at the tool-call boundary:
 
 - `PreToolUse` (Bash matcher): blocks `git add -A` / `git add .` / `git commit -a` with exit code 2 and a stderr message the model sees as feedback.
-- `PreToolUse` (Bash matcher on `git commit`): runs `git status --short` and injects the result as `additionalContext` so the model sees what's actually staged before the commit fires.
+- `PreToolUse` (Bash matcher on `git commit`): runs `git status --short` and injects the result as `additionalContext` so the model sees what's actually staged before the commit fires, and notes when the commit carries no pathspec (rule 1, pathspec form).
 - `PostToolUse` (Bash matcher on `git commit`): runs `git branch --contains <hash>` and warns if empty.
 - `Stop`: cleans orphan worktrees (the source-repo `~/.claude/hooks/cleanup-orphan-worktree-agents.sh` reference implementation).
 
 **Critical limitation.** Hooks operate at the tool-call boundary and cannot protect themselves — Edit/Write tools can modify `.claude/settings.json` or the hook scripts. Hooks are *process discipline*, not algorithmic constraint. For hard isolation, combine with OS-level file permissions or container boundaries.
+
+**Hooks fail visible, never silent.** A hook whose dependency is missing (jq for the bash twins) must say so in the model's context — an `ask` on git commands for the hygiene gate, a context line for the freshness gate and the orphan check — rather than exit 0 and let the session believe it is enforced. An enforcement you cannot see fail is an enforcement you do not have (§15.1). *(Tooling 1.1.7; before it the bash hooks silently no-op'd without jq — a limit the README documented and no review had graded as a defect.)*
 
 **Sub-finding for parallel work.** Subagents run in isolated context — parent-session hooks do NOT fire on subagent tool calls. Each subagent needs its hooks declared in its own frontmatter or in `.claude/settings.json` scoped to the subagent name.
 
@@ -352,6 +359,7 @@ Keep stubs in `current.md` for one round, then sweep them entirely on the next c
 
 **Created:** YYYY-MM-DD
 **Status:** PROPOSED | IN PROGRESS | DONE
+**Supersedes:** (plan, task or decision this plan retires — omit when none)
 
 ## Problem
 ## Proposed Solution
@@ -820,6 +828,7 @@ Listed because they're patterns that got tried and failed in the source repo.
 - **Architect picks up the keyboard "for small fixes."** Architect loses cross-cutting view.
 - **Reading the whole codebase before locating a function.** Use the AST index; read the 2-3 files you actually need.
 - **Letting subagent `model:` default to "inherit."** Your cheap reviewer silently runs on Opus.
+- **Reusing a cheap tier's count, value or list as a fact.** A locating subagent returns pointers; the extraction happens at the source by the tier that owns the verdict (§5.3, locate-don't-extract; S6 wrong-cardinality).
 - **Compressing plans to wire.** Plans need full-fidelity prose. Wire is for state, not design.
 - **Running ≥2 implementing sessions in one working tree when worktrees are available.** The five §6.4 rules contain the shared-index race; worktree-per-session removes it. Containment where removal was available is a standing process-miss.
 - **Client-side enforcement only.** Hooks can be edited by the agent they police. Without the CI second wall (§6.4), "enforced" means "requested."

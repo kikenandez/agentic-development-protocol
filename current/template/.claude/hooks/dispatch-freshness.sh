@@ -22,6 +22,14 @@ DISPATCH="${CLAUDE_PROJECT_DIR:-.}/docs/tasks/current.md"
 [ -f "$DISPATCH" ] || exit 0   # no Dispatch yet (fresh install) — don't block
 
 INPUT="$(cat 2>/dev/null || echo '{}')"
+
+# FAIL VISIBLE, never silent: without jq the gate cannot emit a block, so say
+# so (UserPromptSubmit stdout on exit 0 reaches the model as context).
+if ! command -v jq >/dev/null 2>&1; then
+  echo "ADP §6.2 freshness gate is NOT enforcing: jq not found. Check docs/tasks/current.md freshness yourself (updated <24h and <3 commits ago), or install jq / switch to the Node hooks."
+  exit 0
+fi
+
 SESSION="$(printf '%s' "$INPUT" | jq -r '.session_id // "nosession"' 2>/dev/null || echo nosession)"
 case "$SESSION" in (""|*[!A-Za-z0-9_-]*) SESSION="nosession" ;; esac  # never a path fragment
 LATCH="/tmp/.adp-dispatch-ok-${SESSION}"

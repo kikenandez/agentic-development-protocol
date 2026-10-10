@@ -29,6 +29,17 @@ set -euo pipefail
 [ "${ADP_GIT_HOOK_DISABLE:-0}" = "1" ] && exit 0
 
 INPUT="$(cat)"
+
+# FAIL VISIBLE, never silent: without jq this hook cannot parse the call, and a
+# hygiene gate that quietly disables itself is worse than none (the model would
+# believe it is enforced). Crude raw-payload scan, then ASK on any git command.
+if ! command -v jq >/dev/null 2>&1; then
+  case "$INPUT" in
+    *git*) printf '%s' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"ADP git-hygiene hook is NOT enforcing: jq not found, so the command cannot be parsed. Install jq (brew install jq / apt install jq / winget install jqlang.jq) or switch to the Node hooks (.claude/HOOKS-cross-platform.md). Proceed only if you have run git status --short yourself and staged by exact path."}}' ;;
+  esac
+  exit 0
+fi
+
 CMD="$(printf '%s' "$INPUT" | jq -r '.tool_input.command // ""' 2>/dev/null || echo "")"
 case "$CMD" in *git*) : ;; *) exit 0 ;; esac
 
@@ -81,8 +92,14 @@ fi
 if printf '%s' "$STRIPPED" | grep -Eq "${G}commit($SP|\$)"; then
   STATUS="$(git status --short 2>/dev/null || echo '(git status unavailable)')"
   [ -z "$STATUS" ] && STATUS="(working tree clean — nothing staged?)"
+  # §6.4 rule 1 (pathspec form, n=2): a bare `git commit` snapshots the whole
+  # shared index, so a co-session's staged files ride along however carefully
+  # YOU staged. `git commit -- <paths>` constrains what the command can touch.
+  PATHSPEC_NOTE=""
+  printf '%s' "$STRIPPED" | grep -Eq "${G}commit($SP+[^;&|]*)?$SP+--($SP|\$)" \
+    || PATHSPEC_NOTE="$(printf '\n\nNo pathspec on this commit. On a shared working tree prefer `git commit -m \"...\" -- <path1> <path2>` (rule 1, pathspec form) so a parallel session'"'"'s staged files cannot be swept in. (Not needed in a worktree-per-session setup.)')"
   emit allow "git commit allowed; staged set surfaced for §6.4 rule 2 review." \
-    "$(printf 'ADP §6.4 rule 2 — review the staged set BEFORE this commit lands.\n`git status --short`:\n%s\n\nStaged entries (M/A/D left column) MUST be only files you own. Un-stage strays: git reset HEAD <path>. If a stray already committed, fix forward with a new commit (rule 5), never --amend.' "$STATUS")"
+    "$(printf 'ADP §6.4 rule 2 — review the staged set BEFORE this commit lands.\n`git status --short`:\n%s\n\nStaged entries (M/A/D left column) MUST be only files you own. Un-stage strays: git reset HEAD <path>. If a stray already committed, fix forward with a new commit (rule 5), never --amend.%s' "$STATUS" "$PATHSPEC_NOTE")"
 fi
 
 exit 0

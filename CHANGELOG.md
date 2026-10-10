@@ -19,10 +19,54 @@ Rule of thumb: if it changes `PROTOCOL.md`, it's a minor (1.2). If it changes th
 installer/template/docs, it's a patch (1.1.x). Pure doc tweaks can ride along
 without their own bump.
 
-## [Unreleased]
+## [1.1.7] — 2026-10-10 (hooks fail visible, bounds script, pathspec rule, review v0.3)
 
 ### Added
 
+- **`current/scripts/adp_bounds.py`** + `test_adp_bounds.py` — mechanical size caps
+  for the standing-context files: `current.md` lines (warn > 800, fail > 1000 —
+  process.md §10), bytes (fail > 64 KB), Dispatch block (warn > 60 lines) and the
+  memory read layer (fail > 200 lines — §10.2). Exit 1 on a breach, `--strict`
+  turns warnings into failures; runnable from a hook or CI. Installed by `init.*`,
+  removed by `uninstall.*`. The advice stays in `process.md`; the check now exists.
+- **Task and plan formats: `Supersedes:` field; Result-block provenance tags**
+  (`[read: file:line, date]` / `[calc: …]` / `[hyp: …]`) — notations, not rules
+  (PROTOCOL §6.3, §6.8; template `process.md`, `plans/_template.md`).
+- **PROTOCOL §5.3 "locate, don't extract"** + a §13 anti-pattern: a cheap tier's
+  count, value or list is a pointer, not a fact — indexes the protocol-review
+  research rule and S6 rather than adding a check.
+- **Template rules table: BLOCKED body shape** (question · candidate answers ·
+  what each changes). **Retro template §7:** a VERIFY question on automations
+  that run unattended (how many supervised runs first).
+
+### Changed
+
+- **Hooks fail visible (bash twins).** `git-hygiene.sh` now ASKS on any git command
+  when jq is missing; `dispatch-freshness.sh` and `post-commit-orphan-check.sh`
+  emit a context line saying the gate is not enforcing. Before, all three exited 0
+  silently (documented in the README as a known limit; never graded as a defect).
+  Three no-jq cases added to `test_git_hygiene.py` (runs the hook on a PATH shim
+  without jq).
+- **PROTOCOL §6.4 rule 1 generalised in place to the pathspec commit form**
+  (`git commit -m "…" -- <paths>`) — the delta that had cleared the n=2 gate in
+  `proposals/ADP-1.2-candidates.md`; folded into rule 1 rather than numbered as a
+  sixth, per subsume-or-don't. Template `process.md` §4a rule 1 matches. The
+  commit hook (both twins) now notes when a commit carries no pathspec; four
+  pathspec cases added to `test_git_hygiene.py`.
+- **`protocolreview.md` → v0.3:** step 2 names the four homes of a fix (hook ·
+  skill/template line · rule · memory); step 3c's host table gains a
+  "dependency present?" column verified by running the hook without it; step 4
+  gets the bounds script and a supersession scan; step 5 requires an adversarial
+  recheck of the import scan before any edit, with the 2026-10-10 receipt
+  (two wrong, four overstated "ADP lacks" claims; one missed real defect).
+  Outputs checklist extended accordingly.
+- **`proposals/ADP-1.2-candidates.md`** — new section "Import scan (2026-10-10)":
+  what shipped as tooling, what folded as notations, convergence notes on #3 / #4 /
+  #5 from material outside ADP installs (no counter advances), and four n=0
+  candidates (blind second route for published counts, labelled self-check,
+  approval preflight, supervised run-in as a VERIFY question).
+- **Version markers → 1.1.7** (`README.md`, `ROADMAP.md`, `CITATION.cff`, the
+  installed `.agentic-protocol/VERSION`). Spec stays **1.1**.
 - **`current/scripts/adp_ledger_migrate.py`** — converts a prose miss ledger into
   `misses.yml`, one record per numbered miss. Reports field coverage honestly and
   leaves absent fields null rather than guessed.

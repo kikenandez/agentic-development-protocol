@@ -70,9 +70,15 @@ try {
     let status = '';
     try { status = execSync('git status --short', { encoding: 'utf8' }); } catch { status = '(git status unavailable)'; }
     if (!status.trim()) status = '(working tree clean — nothing staged?)';
+    // §6.4 rule 1 (pathspec form, n=2): a bare `git commit` snapshots the whole
+    // shared index, so a co-session's staged files ride along however carefully
+    // YOU staged. `git commit -- <paths>` constrains what the command can touch.
+    const hasPathspec = new RegExp(G + String.raw`commit(\s+[^;&|]*)?\s+--(\s|$)`).test(s);
+    const pathspecNote = hasPathspec ? '' :
+      '\n\nNo pathspec on this commit. On a shared working tree prefer `git commit -m "..." -- <path1> <path2>` (rule 1, pathspec form) so a parallel session\'s staged files cannot be swept in. (Not needed in a worktree-per-session setup.)';
     emit('allow', 'git commit allowed; staged set surfaced for §6.4 rule 2 review.',
       'ADP §6.4 rule 2 — review the staged set BEFORE this commit lands.\n`git status --short`:\n' + status +
-      '\n\nStaged entries (M/A/D left column) MUST be only files you own. Un-stage strays: git reset HEAD <path>. If a stray already committed, fix forward with a new commit (rule 5), never --amend.');
+      '\n\nStaged entries (M/A/D left column) MUST be only files you own. Un-stage strays: git reset HEAD <path>. If a stray already committed, fix forward with a new commit (rule 5), never --amend.' + pathspecNote);
   }
 
   process.exit(0);

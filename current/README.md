@@ -21,6 +21,7 @@ current/
 │   ├── init.sh            # Installer into a target repo
 │   ├── wire-sync.sh       # prose Dispatch → wire format converter (optional)
 │   ├── adp_metrics.py     # protocol metrics snapshot
+│   ├── adp_bounds.py      # size caps for current.md / Dispatch / memory read layer (§10)
 │   └── generate_map.py    # codebase-index AST skeleton generator
 └── template/              # The files ADP installs into your repo
     ├── docs/

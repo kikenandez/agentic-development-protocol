@@ -15,7 +15,7 @@
 #   1. Copies template/. into the target repo (does NOT overwrite existing files)
 #      - .claude/agents/ (Claude Code subagents) ships ONLY with --host=claude-code
 #        (PROTOCOL.md §8.1: "Without the flag, only prose ships")
-#   2. Installs scripts/{generate_map.py,wire-sync.sh,adp_metrics.py} into <target>/scripts/
+#   2. Installs scripts/{generate_map.py,wire-sync.sh,adp_metrics.py,adp_bounds.py} into <target>/scripts/
 #   3. Marks hook scripts executable
 #   4. Prints next steps
 #
@@ -322,7 +322,7 @@ fi
 echo ""
 echo "==> Installing scripts..."
 [ "$DRYRUN" = "1" ] || mkdir -p "$TARGET/scripts"
-SCRIPTS_TO_INSTALL="generate_map.py wire-sync.sh wire-sync.mjs adp_metrics.py adp-fill.sh adp-fill.mjs"
+SCRIPTS_TO_INSTALL="generate_map.py wire-sync.sh wire-sync.mjs adp_metrics.py adp_bounds.py adp-fill.sh adp-fill.mjs"
 # Hook self-tests ship only with the enforcement infra.
 [ "$HOST" = "claude-code" ] && SCRIPTS_TO_INSTALL="$SCRIPTS_TO_INSTALL verify-hooks.sh verify-hooks.mjs"
 for s in $SCRIPTS_TO_INSTALL; do

@@ -214,6 +214,86 @@ candidates awaiting their own n=2:
    `protocolreview.md` step 3c as a review check; awaiting a second install for
    the spec.
 
+## Import scan (2026-10-10; n=0 by install — convergence notes, not counter advances)
+
+Material from outside ADP installs, graded under `protocolreview.md` step 5, with the
+scan itself rechecked adversarially before anything was edited (step 5, v0.3). None
+of it comes from an install with a measurement window, so **nothing below advances
+an n-counter** (MEASUREMENT.md §3 requires a second *install*); what it adds is
+convergence notes on existing candidates, two tooling fixes, four notations, and
+new candidates at n=0.
+
+**Shipped as tooling (1.1.7), no rule minted:**
+- `scripts/adp_bounds.py` + tests — mechanical caps on `current.md` (lines, bytes,
+  Dispatch block) and the memory read layer. "Keep it small" was advice; it is now
+  a check a hook or CI can run, with the advice left in `process.md`.
+- **Hooks fail visible** — the bash hooks now say so (ask / context line) when jq
+  is missing instead of exiting 0. This was a documented ADP limit (README: "without
+  it they silently no-op") that no review had graded as a defect; the simpler rule
+  it failed is *a missing control must say so*.
+
+**Folded as notations / sub-cases (PROTOCOL §6.3, §6.8, §5.3, §13; template):**
+- `Supersedes:` field on tasks and plans — the one of six memory-audit questions
+  ("how does a decision make the previous one obsolete?") ADP answered weakly.
+- Provenance tags `[read: …] [calc: …] [hyp: …]` as the Result-block short form of
+  the HYPOTHESIS discipline for values.
+- Locate-don't-extract line in §5.3 + a §13 anti-pattern: a cheap tier's count or
+  list is a pointer, not a fact — indexes `protocolreview.md` step 5 and S6 rather
+  than adding a check.
+- BLOCKED body shape in the template rules table: question · candidate answers ·
+  what each changes.
+- Rule 1 of §6.4 generalised in place to the **pathspec commit form** — the one
+  delta that had already cleared the n=2 gate (see above); folded now rather than
+  numbered as a sixth rule, per subsume-or-don't.
+
+**Convergence notes on existing candidates (qualitative, from outside installs):**
+- **#3 two-verdict CHECK** — an evidence-reuse-by-risk table (what must be rerun
+  for docs / normal code / security / user-visible changes) reaches the same goal
+  without a separate non-regression verdict.
+- **#4 recurrence counters / plugin-aware precedence** — the same plugin failure
+  shape reported independently: a ready-made rules plugin that blocked without
+  telling the model why, replaced by a small script of the operator's own.
+- **#5 single-source engine** — restated independently as "two memories carrying
+  the same facts always diverge"; and a one-spec-copy, installed-layer-only layout
+  in a prose-only install.
+- **Model routing by task class** — an economy-by-default matrix with no silent
+  escalation and no retry on failure, seen in a prose-only install on other
+  models; the pruned effort-band header (E1) was the wrong *form* of this idea, not
+  the wrong idea. Re-enter as a candidate only with a cost receipt from an install.
+
+**New candidates at n=0 (enter as template questions or bounded pilots, never as
+rules — protocolreview step 6):**
+1. **Blind second route for published counts.** Before a count is published, a
+   verifier that has **not seen the value** finds it by an **independent route** (a
+   different script, a hand grep, a different artifact — re-running the same script
+   at the pinned commit is reproduction, not a second route) and returns value ·
+   route · *independence* · status. Two values differ → stop, log a miss. Run it in
+   a read-only worktree (§8.5), not merely with write tools removed — a verifier
+   with Bash can still write. Honest scope: a verifier run by the author's own
+   harness is still self-reported; this narrows one error class, it does not answer
+   the README's limit, which only an outside install answers.
+2. **Labelled self-check.** When one session both implements and checks, the
+   verdict heading says `SELF-CHECK`, never `ACCEPT` — so a role switch cannot pass
+   as independent review. Cheap; enters as a template heading variant for solo
+   operators.
+3. **Approval preflight.** Before a task goes IN_PROGRESS, the permissions and
+   credentials it needs are confirmed present — never launch a run to discover a
+   missing permission. Enters as a Dispatch standing reminder.
+4. **Supervised run-in before unattended automation.** Entered as a VERIFY question
+   in the retro template (§7), with **no fixed N**: how many supervised runs did the
+   automation have, and what did its last deviation change? Earns a number only if
+   an install logs an ESCAPED miss from an un-run-in automation.
+
+**Rejected in the same scan, with reasons:** an auto-commit snapshot of the whole
+tree on every `Stop` (bypasses the PreToolUse hook entirely and contradicts §6.4
+rule 1 — the five rules stay on even for a solo operator); a push-refusing hook
+(ADP is a published repo; CI is the second wall); static `permissions.ask` lists as
+the primary control (a pattern is bypassed by form; ADP's `ask` is a hook decision
+on the parsed command, with a test suite behind the parser — and the parser was
+bypassed too until it normalised quoting like the shell); per-session model and
+effort advice (harness setting; §5.3's perishability note already says the names
+rot fastest).
+
 ## Promotion gate
 
 Each graduate-candidate enters `PROTOCOL.md` as **1.2** only when a **second

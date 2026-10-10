@@ -24,7 +24,7 @@ re-runnable script against a pinned commit.
 
 | Path | What it is |
 |------|-----------|
-| [`current/`](./current/) | The ratified **ADP 1.1** bundle (tooling **1.1.6**) — spec, scripts, and the template ADP installs into your repo. **Start here.** |
+| [`current/`](./current/) | The ratified **ADP 1.1** bundle (tooling **1.1.7**) — spec, scripts, and the template ADP installs into your repo. **Start here.** |
 | [`current/PROTOCOL.md`](./current/PROTOCOL.md) | The canonical specification. Read this first. |
 | [`current/template/`](./current/template/) | The files ADP installs into a target repository. |
 | [`MEASUREMENT.md`](./MEASUREMENT.md) | How every number ADP publishes about itself is counted. |
@@ -33,9 +33,11 @@ re-runnable script against a pinned commit.
 ## Prerequisites
 
 - **git** and **bash** — required.
-- **python3** — for `scripts/generate_map.py`, `scripts/adp_metrics.py` and
+- **python3** — for `scripts/generate_map.py`, `scripts/adp_metrics.py`, `scripts/adp_bounds.py` and
   `scripts/adp_claims.py`. Stdlib only; no packages to install.
-- **jq** — required by the default (bash) hooks; without it they silently no-op.
+- **jq** — required by the default (bash) hooks; without it they do not enforce,
+  and since tooling 1.1.7 they say so in the session (an `ask` on git commands,
+  a context line for the other gates) instead of silently no-op'ing.
   (`brew install jq` · `apt install jq` · Windows `winget install jqlang.jq`)
 - **node** — only if you use the cross-platform **Node hooks** (`.mjs`), which need
   neither jq nor bash. Recommended on Windows.
@@ -108,7 +110,7 @@ is a result we want published too.
 
 ## Roadmap
 
-**Spec 1.1 is the current stable standard** (tooling 1.1.6). A set of **1.2 candidate
+**Spec 1.1 is the current stable standard** (tooling 1.1.7). A set of **1.2 candidate
 deltas** is in pilot — one cut a production system's live context ~85%, one was
 pruned for being unadopted ceremony. Per ADP's own rule, none graduate into the spec
 until a *second* project reproduces them (n=2). See [`ROADMAP.md`](./ROADMAP.md) and

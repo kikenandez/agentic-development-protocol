@@ -69,6 +69,7 @@ docs/tasks/current.md
 - **Priority:** P0 | P1 | P2 | P3
 - **Created:** YYYY-MM-DD
 - **Completed:** (filled by agent when DONE)
+- **Supersedes:** T{M} | plan {slug} | rule k | none  (only when this task retires an earlier decision)
 
 **Instruction:**
 {What to do — specific files, functions, line numbers, guard rails}
@@ -80,7 +81,9 @@ docs/tasks/current.md
 - [ ] {Concrete verification — test passes, behavior confirmed}
 
 **Result:**
-{Filled by the executing agent: what was done, commit hash, issues found}
+{Filled by the executing agent: what was done, commit hash, issues found.
+ A number that will be reused carries its provenance: [read: file:line, date],
+ [calc: expression] or [hyp: …] — a calculation with a hyp: input is a hypothesis.}
 ```
 
 ### Spawned follow-up tasks
@@ -117,7 +120,7 @@ ARCHITECT reviews DONE tasks, archives to docs/tasks/archive/, updates Dispatch
 | **Pick your tasks** | Only work on tasks assigned to your role. Priority and Dispatch order determine which first. |
 | **Update immediately** | Set IN_PROGRESS before starting, DONE (or REVIEW) when finished. |
 | **Never delete** | Tasks are archived after review, never deleted. |
-| **Blocked?** | Set BLOCKED + explain why. Architect unblocks. |
+| **Blocked?** | Set BLOCKED with a three-part body: the open question, the candidate answers, and what each answer changes in the task. Never a chiffrage built on the unanswered question. Architect unblocks. |
 | **New issue found?** | Add a new task with Status: NEW; write a short spec. Do not modify existing tasks to redirect their scope. |
 | **Direct user fix** | User reports a small bug directly → fix it, add a task with Status: DONE, fill Result. Keeps the backlog accurate. |
 | **Big change?** | If a direct user request requires architectural decisions or touches multiple systems, suggest involving the architect first. |
@@ -203,7 +206,7 @@ Parallel sessions share the same working directory. Git staging is the fault lin
 
 ### Hard rules (five)
 
-1. **Stage by exact path, never bulk.** Use `git add path/to/file1 path/to/file2`. **Never** `git add -A`, `git add .`, `git commit -a`, or any variant that stages the whole working tree. If you need to include a file not on your owned list (§4), stop and write a handoff task instead.
+1. **Stage by exact path, never bulk — and commit by exact path too.** Use `git add path/to/file1 path/to/file2`, then `git commit -m "..." -- path/to/file1 path/to/file2`. **Never** `git add -A`, `git add .`, `git commit -a`, or any variant that stages the whole working tree. A bare `git commit` snapshots the whole shared index, so a parallel session's staged files are swept into your commit however carefully you staged; the pathspec constrains what the command can touch (ratified at n=2 from real sweep incidents; not needed in a worktree-per-session setup). If you need to include a file not on your owned list (§4), stop and write a handoff task instead.
 
 2. **Never `git reset --hard` without a stash.** If a commit has the wrong content, prefer `git reset --soft HEAD~1` (preserves staging) or `git reset HEAD~1` (preserves working tree, default). Hard reset is the last resort and must be preceded by `git stash` to capture the working tree in a survivable object.
 

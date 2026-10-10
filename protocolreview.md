@@ -1,10 +1,12 @@
 # The Protocol Review — a recurring improvement ritual for ADP installs
 
-**Status:** TOOL, v0.2 — extracted 2026-08-20 from a full review run on the n=1
+**Status:** TOOL, v0.3 — extracted 2026-08-20 from a full review run on the n=1
 production install (the web application); revised 2026-10-02 after a second run on the
-same install ([run 2 report](evidence/protocolreview_run2_webapp_2026-10-02.md)). Two
+same install ([run 2 report](evidence/protocolreview_run2_webapp_2026-10-02.md)); v0.3
+on 2026-10-10 folds an **import scan** (step 5) over material from outside ADP installs,
+with an adversarial recheck of the scan itself before anything was edited. Two
 executions, **one install** — still n=1 by install. Every step carries a receipt;
-v0.2 additions are marked *(v0.2)*. Portable by design; graded honestly where it is not.
+v0.2 / v0.3 additions are marked. Portable by design; graded honestly where it is not.
 **Companion docs:** `proposals/ADP-1.2-candidates.md` (what a review can graduate),
 `proposals/semantic-verification-checklist.md` (a review import that reached n=2).
 
@@ -70,6 +72,14 @@ documented fix is almost always fixed one level too far from the act.
 > (writing dispatch/spec/ruling text forward) — one card indexing six families,
 > instead of six more rules.
 
+*(v0.3)* The ladder has four homes, and the review names which one each family
+gets: **a hook** (fires at the act, no vigilance needed) · **a line in a skill or
+template** (fires when the method is loaded) · **a rule** in the ledger (cited,
+decays) · **a memory file** (a remembered lesson, weakest). A rule is the home of
+last resort, after subsume-or-don't (step 6). The same four-way question is
+asked by single-operator memory protocols at every correction — convergent, not
+imported.
+
 ### 3. Rules-corpus audit — four checks, all mechanical
 
 **(a) Reachability.** Grep the protocol for its own claim about where the rules
@@ -111,6 +121,16 @@ first pass — it does not replace the cross-layer read.
 > plugins issuing rules the protocol had never enumerated; one blocked a commit
 > call the same night.
 
+*(v0.3)* The host table of hooks carries one more column: **dependency present?**
+A hook whose dependency is missing must fail *visible* — say so in the model's
+context — never exit 0 as if it had enforced. Verify by running the hook with
+the dependency removed from `PATH` (the install's `test_git_hygiene.py` does this
+for jq), not by reading the script.
+> Receipt (2026-10-10 import scan): ADP's own bash hooks silently no-op'd without
+> jq — documented in the README as a known limit, never treated as a defect until
+> the scan graded it against a simpler rule (a missing control must say so).
+> Fixed in tooling 1.1.7 with a test.
+
 **(d) Citation-decay disposal.** Each rule carries a citation baseline; each
 review counts *fresh* citations over material added since the previous review
 (`git log --since=<last review> --name-only`, grepped for the rule's citation
@@ -150,6 +170,18 @@ files — generators that skip DONE rows silently hide half-closed ones.
 > Receipt (run 2): an obligation ledger had reached 2,566 lines with no target;
 > the census found 4 half-closed task files the index generator had skipped.
 
+*(v0.3)* **Size targets are a script, not a reminder:** `scripts/adp_bounds.py`
+fails on the mechanical trigger (current.md lines / bytes, memory read layer) and
+warns on the Dispatch block, so a hook or CI step can run this step's first pass.
+*(v0.3)* **Supersession scan.** For every decision retired in the window (a task
+CANCELED or DEFERRED, a plan replaced, a rule retired), is the pointer present —
+`Supersedes:` on the task or plan, the retirement ledger for a rule? A retired
+decision without a pointer is the one the next session resurfaces. Six questions
+make a cheap self-audit of this step; four of them
+the review already runs (who writes long memory; where current state lives; what
+loads per session and its weight; can you go back to yesterday) and two it did not
+until v0.3 (how a decision supersedes; how a correction becomes durable — step 2).
+
 ### 5. External import scan
 
 Pick one high-discipline comparable (a mature OSS project, another ADP install,
@@ -171,6 +203,18 @@ as new features. Verify each claimed import at the source before grading it.
 > Receipt (run 2): the host's changelog, June–October 2026, verified at source:
 > 5 real imports; the subagent's first pass had listed the install's own
 > conventions among them.
+
+*(v0.3)* **Recheck the scan adversarially before acting on it** — a second agent
+given the sources and the scan, told to find what is wrong, overstated or missed,
+never the scan's conclusions. The failure mode is the mirror of v0.2's: a scan
+written by the install's own author under-reads the install (claims "ADP lacks X"
+where X lives in this review tool or in `MEASUREMENT.md`) and over-reads the
+convergence.
+> Receipt (2026-10-10 import scan): of eight "ADP lacks" claims in the first
+> pass, two were wrong and four overstated (the shape existed here at review
+> cadence); one real ADP defect the scan had missed (hooks no-op without jq) was
+> the most valuable item of the run. Graded result: notations and sub-cases, not a
+> gap analysis — three shipped as fields, two as tooling, the rest as candidates.
 
 ### 6. Fold and ratify — under subsume-or-don't
 
@@ -223,7 +267,9 @@ next session boots from:
 - [ ] Cross-layer contradiction scan run, plugins included; each hit fixed or precedence-claused
 - [ ] Citation-decay pass run, by number AND name; every flagged rule disposed (retire/subsume/keep-with-reason)
 - [ ] Every standing memory file at its target size; status census run; long-term guards green; index regenerated in order
-- [ ] External imports verified at source and graded with receipts; adopted ones ratified under subsume-or-don't
+- [ ] External imports verified at source and graded with receipts; adopted ones ratified under subsume-or-don't; the scan itself rechecked adversarially before any edit
+- [ ] Every hook's dependency verified present, or its absence shown to fail visible (`test_git_hygiene.py` no-jq cases green)
+- [ ] `scripts/adp_bounds.py` green on the install; every retired decision in the window carries its supersession pointer
 - [ ] Decisions taken to the owner as three packages (corrections · policy · bounded pilots)
 - [ ] Simplification tasks filed (not intended)
 - [ ] Handover committed: hashes, regenerated owed list, own-misses, next trigger

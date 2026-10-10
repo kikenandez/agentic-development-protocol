@@ -1,5 +1,5 @@
-ADP 1.1.6
-Released: 2026-08-22
+ADP 1.1.7
+Released: 2026-10-10
 Source DNA: a multi-agent production system, ~80 deploy rounds
 Spec: see the agentic-development-protocol repository (current/PROTOCOL.md)
 Spec version: 1.1 (unchanged — 1.1.x is the installer/tooling patch line)
@@ -65,3 +65,14 @@ What's new in 1.1.6 (measurement & evidence — no spec change):
   reports a range and per-verdict receipts, and prints its own blind spots
 - scripts/adp_history.py: output mix of an install from git history (corpus
   composition, churn, cadence, convention adherence)
+
+What's new in 1.1.7 (hooks fail visible, bounds script, pathspec rule — no spec change):
+- Bash hooks say so when jq is missing (ask on git commands; context line for the
+  freshness gate and the orphan check) instead of silently doing nothing
+- scripts/adp_bounds.py: mechanical caps on current.md (lines, bytes, Dispatch
+  block) and memory/CLAUDE.md; exit 1 on a breach, --strict for warnings
+- §6.4 rule 1 now includes the pathspec form of committing (`-- <paths>` after
+  the message); the commit hook notes when a commit carries no pathspec
+- Task/plan formats: Supersedes: field; Result-block provenance tags
+  [read: …] [calc: …] [hyp: …]; BLOCKED body shape; retro VERIFY question on
+  unattended automation

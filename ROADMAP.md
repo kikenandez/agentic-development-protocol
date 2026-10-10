@@ -3,7 +3,7 @@
 ADP versions the *standard*: `<spec-major>.<spec-minor>.<tooling-patch>` (see
 `CHANGELOG.md` → Versioning policy).
 
-## Current: spec **1.1**, tooling **1.1.6** (stable)
+## Current: spec **1.1**, tooling **1.1.7** (stable)
 
 `current/PROTOCOL.md` is the ratified 1.1 specification. The 1.1.x line has been
 hardened across multiple real installs (cross-platform installer, one-file
@@ -35,6 +35,13 @@ to candidate #5 and one new candidate (plugin-aware precedence); it graduates
 nothing, because both runs are on one install. No result from the second
 install's forward measurement window is recorded yet; that remains the blocker. The review tool itself moved to v0.2 —
 see [`protocolreview.md`](./protocolreview.md).
+
+**Status 2026-10-10 (tooling 1.1.7).** An import scan graded material from outside
+ADP installs; it shipped two tooling fixes (bash hooks fail visible without jq;
+`scripts/adp_bounds.py`), folded four notations into the formats, generalised §6.4
+rule 1 to the pathspec commit form (the one n=2 delta), and recorded four n=0
+candidates. No counter advanced — none of the material is an install. The review
+tool moved to v0.3 (adversarial recheck of any import scan before editing).
 
 One candidate was already **pruned** in the pilot for being unadopted ceremony —
 evidence the review mechanism isn't self-preserving.

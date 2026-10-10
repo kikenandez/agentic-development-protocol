@@ -13,6 +13,16 @@ set -euo pipefail
 [ "${ADP_GIT_HOOK_DISABLE:-0}" = "1" ] && exit 0
 
 INPUT="$(cat)"
+
+# FAIL VISIBLE, never silent: without jq the orphan check cannot run; say so
+# on any commit-looking call rather than let "committed" go unverified.
+if ! command -v jq >/dev/null 2>&1; then
+  case "$INPUT" in
+    *"git commit"*|*"git "*"commit"*) printf '%s' '{"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"ADP §6.4 rule 3 orphan check is NOT running: jq not found. Verify reachability yourself before claiming committed: git branch --contains <hash> must be non-empty. Install jq or switch to the Node hooks."}}' ;;
+  esac
+  exit 0
+fi
+
 CMD="$(printf '%s' "$INPUT" | jq -r '.tool_input.command // ""' 2>/dev/null || echo "")"
 
 # Only act on commands that actually ran a git commit (strip quoted text first
