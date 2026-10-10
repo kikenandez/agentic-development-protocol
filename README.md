@@ -126,8 +126,8 @@ Two things can be cited, and they are different objects.
 > https://doi.org/10.5281/zenodo.22062353
 
 That DOI always resolves to the newest release, so it stays correct as the protocol
-evolves. To pin a specific version, use its own DOI instead — v1.1.6 is
-`10.5281/zenodo.22062354`. Releases are also archived in
+evolves. To pin a specific version, use its own DOI instead — v1.1.7 is
+`10.5281/zenodo.23286498`. Releases are also archived in
 [Software Heritage](https://www.softwareheritage.org/) and indexed by OpenAIRE.
 
 **The paper** — cite this if you are engaging with the argument or the evidence:

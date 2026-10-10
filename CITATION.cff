@@ -36,6 +36,9 @@ identifiers:
     value: "10.5281/zenodo.22062353"
     description: "Concept DOI — always resolves to the latest release of the protocol"
   - type: doi
+    value: "10.5281/zenodo.23286498"
+    description: "Release v1.1.7"
+  - type: doi
     value: "10.5281/zenodo.22062354"
     description: "Release v1.1.6"
   - type: doi
