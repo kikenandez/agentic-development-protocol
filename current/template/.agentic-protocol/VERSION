@@ -1,5 +1,5 @@
-ADP 1.1.7
-Released: 2026-10-10
+ADP 1.1.8
+Released: 2026-10-12
 Source DNA: a multi-agent production system, ~80 deploy rounds
 Spec: see the agentic-development-protocol repository (current/PROTOCOL.md)
 Spec version: 1.1 (unchanged — 1.1.x is the installer/tooling patch line)
@@ -76,3 +76,10 @@ What's new in 1.1.7 (hooks fail visible, bounds script, pathspec rule — no spe
 - Task/plan formats: Supersedes: field; Result-block provenance tags
   [read: …] [calc: …] [hyp: …]; BLOCKED body shape; retro VERIFY question on
   unattended automation
+
+What's new in 1.1.8 (freshness latch fix — no spec change):
+- The §6.2 freshness latch is released on SessionEnd (new session-end-latch
+  hook), not Stop: Stop fires every turn, so the gate re-ran on every prompt
+- A freshly installed docs/tasks/current.md is stamped with the install time,
+  so the gate's 24h check no longer blocks the first prompt
+- init --upgrade prints a NOTE when settings.json lacks the SessionEnd entry

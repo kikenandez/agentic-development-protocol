@@ -19,7 +19,7 @@ Rule of thumb: if it changes `PROTOCOL.md`, it's a minor (1.2). If it changes th
 installer/template/docs, it's a patch (1.1.x). Pure doc tweaks can ride along
 without their own bump.
 
-## [Unreleased] — dispatch-freshness latch fix
+## [1.1.8] — 2026-10-12 (freshness latch on SessionEnd, fresh-install Dispatch date)
 
 ### Fixed
 

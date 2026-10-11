@@ -3,7 +3,7 @@
 ADP versions the *standard*: `<spec-major>.<spec-minor>.<tooling-patch>` (see
 `CHANGELOG.md` → Versioning policy).
 
-## Current: spec **1.1**, tooling **1.1.7** (stable)
+## Current: spec **1.1**, tooling **1.1.8** (stable)
 
 `current/PROTOCOL.md` is the ratified 1.1 specification. The 1.1.x line has been
 hardened across multiple real installs (cross-platform installer, one-file
@@ -42,6 +42,12 @@ ADP installs; it shipped two tooling fixes (bash hooks fail visible without jq;
 rule 1 to the pathspec commit form (the one n=2 delta), and recorded four n=0
 candidates. No counter advanced — none of the material is an install. The review
 tool moved to v0.3 (adversarial recheck of any import scan before editing).
+
+**Status 2026-10-12 (tooling 1.1.8).** A bug fix from an install: the freshness
+gate's once-per-session latch was released on `Stop`, which fires every turn, so
+the gate blocked the architect mid-session (seen twice). The latch now releases on
+`SessionEnd`; a fresh install's Dispatch is also stamped with the install time. No
+spec change; no counter advanced.
 
 One candidate was already **pruned** in the pilot for being unadopted ceremony —
 evidence the review mechanism isn't self-preserving.
