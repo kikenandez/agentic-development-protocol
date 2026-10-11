@@ -113,6 +113,8 @@ for (const src of walk(TEMPLATE_DIR)) {
   if (DRY) { console.log(`  WOULD ADD  ${r}`); added++; continue; }
   fs.mkdirSync(dirname(dst), { recursive: true });
   fs.copyFileSync(src, dst);
+  // A fresh Dispatch must read as fresh, or the §6.2 gate (24h) blocks the first prompt.
+  if (r === 'docs/tasks/current.md') { const now = new Date(); fs.utimesSync(dst, now, now); }
   console.log(`  ADD   ${r}`); manifest.push(r); added++;
 }
 console.log('');

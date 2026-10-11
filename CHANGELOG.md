@@ -32,6 +32,10 @@ without their own bump.
   `session-end-latch.{sh,mjs}` hook, wired in both `settings.json` and
   `settings.node.json`; `stop-cleanup` keeps worktree pruning and wire sync only.
   The gate itself is unchanged: every new session is still checked.
+- **Fresh install blocked on its first prompt.** The installer copied the
+  template's `docs/tasks/current.md` with its original date, so the gate's 24h
+  check tripped immediately. `init.{sh,mjs}` now stamp the new Dispatch with the
+  install time (only when it is added, never on an existing one).
 - `verify-hooks.{sh,mjs}` now check that the SessionEnd hook releases the latch;
   `uninstall.*` removes the new hook.
 

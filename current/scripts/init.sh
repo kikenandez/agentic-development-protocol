@@ -199,6 +199,9 @@ while IFS= read -r -d '' src; do
       echo "  WOULD ADD  $rel"
     else
       mkdir -p "$(dirname "$dst")"; cp -p "$src" "$dst"
+      # cp -p keeps the template's date; a fresh Dispatch must read as fresh or
+      # the §6.2 gate (24h limit) blocks the very first prompt.
+      [ "$rel" = "docs/tasks/current.md" ] && touch "$dst"
       echo "  ADD   $rel"; echo "$rel" >> "$MANIFEST_TMP"
     fi
     ADDED=$((ADDED+1))
