@@ -6,9 +6,12 @@
 #      baseline-per-session checks §6.1 that didn't clean up).
 #   2. If scripts/wire-sync.sh exists, regenerate .adp/ wire files from
 #      docs/tasks/current.md (L4 adoption — §9.4).
-#   3. Drop this session's dispatch-freshness latch.
 #
-# Requires: jq (optional — only for the latch). Kill switch: ADP_STOP_HOOK_DISABLE=1.
+# The dispatch-freshness latch is released by session-end-latch.sh (SessionEnd),
+# NOT here: Claude Code fires Stop at the end of EVERY turn, so releasing the
+# latch on Stop re-armed the once-per-session gate on every prompt (2026-10-12).
+#
+# Kill switch: ADP_STOP_HOOK_DISABLE=1.
 
 set -uo pipefail   # deliberately NOT -e: cleanup must never fail the stop
 
@@ -32,11 +35,5 @@ fi
 if [ -x "$ROOT/scripts/wire-sync.sh" ] && [ -d "$ROOT/.adp" ]; then
   "$ROOT/scripts/wire-sync.sh" >/dev/null 2>&1
 fi
-
-# 3. Release the freshness latch for this session
-INPUT="$(cat 2>/dev/null || echo '{}')"
-SESSION="$(printf '%s' "$INPUT" | jq -r '.session_id // ""' 2>/dev/null || echo "")"
-case "$SESSION" in (""|*[!A-Za-z0-9_-]*) SESSION="" ;; esac  # never a path fragment
-[ -n "$SESSION" ] && rm -f "/tmp/.adp-dispatch-ok-${SESSION}" 2>/dev/null
 
 exit 0

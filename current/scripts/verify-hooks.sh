@@ -69,6 +69,16 @@ else
 fi
 
 echo ""
+echo "session-end-latch.sh (releases the freshness latch at SessionEnd):"
+if [ -f "$HOOKS/session-end-latch.sh" ]; then
+  L="/tmp/.adp-dispatch-ok-verify-end-$$"; touch "$L"
+  printf '{"session_id":"verify-end-%s"}' "$$" | bash "$HOOKS/session-end-latch.sh" >/dev/null 2>&1
+  [ ! -e "$L" ] && ok "latch released at SessionEnd" || { bad "latch released" "removed" "still present"; rm -f "$L"; }
+else
+  echo "  SKIP  not installed (pre-1.1.8)"
+fi
+
+echo ""
 echo "post-commit-orphan-check.sh (advisory):"
 if printf '{"tool_input":{"command":"git status"}}' | bash "$HOOKS/post-commit-orphan-check.sh" >/dev/null 2>&1; then
   ok "runs clean on a normal git command"

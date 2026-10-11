@@ -47,7 +47,7 @@ if (!DRY && process.stdin.isTTY) {
 // 1) scaffolding (always)
 console.log('==> Removing protocol scaffolding...');
 rm('.adp'); rm('.agentic-protocol'); rm('.github/workflows/adp-checks.yml');
-for (const h of ['git-hygiene', 'dispatch-freshness', 'post-commit-orphan-check', 'stop-cleanup']) { rm(`.claude/hooks/${h}.sh`); rm(`.claude/hooks/${h}.mjs`); }
+for (const h of ['git-hygiene', 'dispatch-freshness', 'post-commit-orphan-check', 'stop-cleanup', 'session-end-latch']) { rm(`.claude/hooks/${h}.sh`); rm(`.claude/hooks/${h}.mjs`); }
 rm('.claude/settings.node.json'); rm('.claude/HOOKS-cross-platform.md');
 for (const a of ['architect', 'developer', 'designer', 'reviewer']) rm(`.claude/agents/${a}.md`);
 for (const p of ['architect', 'developer', 'designer', 'reviewer', 'analyst', 'business', 'comms', 'process', 'initialize']) rm(`docs/prompts/${p}.md`);

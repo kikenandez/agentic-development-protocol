@@ -45,6 +45,17 @@
           }
         ]
       }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/session-end-latch.mjs\"",
+            "timeout": 5
+          }
+        ]
+      }
     ]
   }
 }

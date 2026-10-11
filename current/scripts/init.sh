@@ -284,6 +284,14 @@ if [ "$HOST" = "claude-code" ]; then
         echo "  WARN: no jq and no node — settings.json NOT wired (hooks INERT)."
         echo "        Install jq or node, then wire from .claude/settings.json.adp-hooks."; fi
     fi
+    # Pre-1.1.8 wiring released the freshness latch on Stop (fires every turn).
+    # settings.json is user-owned, so we point at the missing SessionEnd entry
+    # instead of editing it.
+    if grep -q 'git-hygiene' "$SETTINGS" 2>/dev/null && ! grep -q 'session-end-latch' "$SETTINGS" 2>/dev/null; then
+      echo "  NOTE: settings.json has no SessionEnd hook. Add the \"SessionEnd\" block from"
+      echo "        .claude/settings.json (bash) or settings.node.json (Node) so each new session"
+      echo "        re-checks Dispatch freshness. Without it the gate still runs once per session."
+    fi
   fi
 fi
 

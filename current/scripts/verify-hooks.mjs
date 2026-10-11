@@ -8,14 +8,16 @@
 // Usage:  node verify-hooks.mjs [/path/to/repo]   (defaults to cwd)
 // Exit:   0 all passed · 1 a check failed · 2 cannot run (missing hooks)
 import { execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, writeFileSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
 
 const TARGET = process.argv[2] ? resolve(process.argv[2]) : process.cwd();
 const HOOKS = join(TARGET, '.claude', 'hooks');
 const GH = join(HOOKS, 'git-hygiene.mjs');
 const DF = join(HOOKS, 'dispatch-freshness.mjs');
 const PO = join(HOOKS, 'post-commit-orphan-check.mjs');
+const SE = join(HOOKS, 'session-end-latch.mjs');
 
 if (!existsSync(GH)) {
   console.error(`Error: ${GH} not found. Install with --host=claude-code (Node hooks ship there).`);
@@ -61,6 +63,15 @@ if (existsSync(DF)) {
   const r = runHook(DF, { session_id: `verify-${process.pid}` });
   (r?.decision !== 'block') ? ok('fresh/initial Dispatch is not blocked')
                             : bad('fresh Dispatch not blocked', 'not-block', 'block');
+}
+if (existsSync(SE)) {
+  console.log('\nsession-end-latch.mjs (releases the freshness latch at SessionEnd):');
+  const id = `verify-end-${process.pid}`;
+  const latch = join(tmpdir(), `.adp-dispatch-ok-${id}`);
+  writeFileSync(latch, '');
+  runHook(SE, { session_id: id });
+  if (!existsSync(latch)) ok('latch released at SessionEnd');
+  else { bad('latch released', 'removed', 'still present'); rmSync(latch, { force: true }); }
 }
 if (existsSync(PO)) {
   console.log('\npost-commit-orphan-check.mjs (advisory):');

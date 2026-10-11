@@ -5,27 +5,23 @@
 //      (named <repo>-adp-(competition|baseline|tmp)-…). Your real worktrees
 //      are never touched.
 //   2. If scripts/wire-sync.sh exists, regenerate .adp/ wire files.
-//   3. Drop this session's dispatch-freshness latch.
+//
+// The dispatch-freshness latch is released by session-end-latch.mjs (SessionEnd),
+// NOT here: Claude Code fires Stop at the end of EVERY turn (2026-10-12).
 //
 // Note: wire-sync.sh is still a bash script; on native Windows it runs only if a
 // bash interpreter is reachable. Porting wire-sync itself is tracked separately.
 //
 // Kill switch: ADP_STOP_HOOK_DISABLE=1
 import { execFileSync } from 'node:child_process';
-import { existsSync, rmSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { tmpdir } from 'node:os';
 
 if (process.env.ADP_STOP_HOOK_DISABLE === '1') process.exit(0);
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR || '.';
 // argv form (no shell): worktree paths and other git output are never shell-parsed.
 const tryGit = (...args) => { try { return execFileSync('git', args, { cwd: ROOT, encoding: 'utf8' }); } catch { return ''; } };
-async function readStdin() {
-  const chunks = [];
-  for await (const c of process.stdin) chunks.push(c);
-  return Buffer.concat(chunks).toString('utf8');
-}
 
 try {
   // 1. Prune + remove ADP throwaway worktrees
@@ -50,13 +46,6 @@ try {
       else if (existsSync(wireSh)) execFileSync('bash', [wireSh], { cwd: ROOT, stdio: 'ignore' });
     } catch { /* best effort */ }
   }
-
-  // 3. Release the freshness latch for this session
-  const raw = await readStdin();
-  let session = '';
-  try { session = JSON.parse(raw || '{}')?.session_id || ''; } catch {}
-  if (!/^[A-Za-z0-9_-]{1,128}$/.test(session)) session = ''; // never a path fragment
-  if (session) { try { rmSync(join(tmpdir(), `.adp-dispatch-ok-${session}`), { force: true }); } catch {} }
 
   process.exit(0);
 } catch {

@@ -145,6 +145,15 @@ if (isCC) {
       else { fs.mkdirSync(dirname(SET), { recursive: true }); fs.copyFileSync(TPL_NODE, SET);
         console.log('  WROTE settings.json wiring the Node hooks.'); manifest.push('.claude/settings.json'); }
     }
+    // Pre-1.1.8 wiring released the freshness latch on Stop (fires every turn).
+    // settings.json is user-owned, so we point at the missing SessionEnd entry
+    // instead of editing it.
+    const now = fs.existsSync(SET) ? fs.readFileSync(SET, 'utf8') : '';
+    if (now.includes('git-hygiene') && !now.includes('session-end-latch')) {
+      console.log('  NOTE: settings.json has no SessionEnd hook. Add the "SessionEnd" block from');
+      console.log('        .claude/settings.node.json (or settings.json for bash) so each new session');
+      console.log('        re-checks Dispatch freshness. Without it the gate still runs once per session.');
+    }
   }
 }
 function readJson(p) { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return null; } }

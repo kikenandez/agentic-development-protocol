@@ -19,6 +19,30 @@ Rule of thumb: if it changes `PROTOCOL.md`, it's a minor (1.2). If it changes th
 installer/template/docs, it's a patch (1.1.x). Pure doc tweaks can ride along
 without their own bump.
 
+## [Unreleased] — dispatch-freshness latch fix
+
+### Fixed
+
+- **Freshness gate re-ran on every prompt.** `stop-cleanup` released the §6.2
+  once-per-session latch on Claude Code's `Stop` event, which fires at the end of
+  every turn, not at session end. The gate therefore re-checked the Dispatch
+  before each prompt and blocked the architect mid-session as soon as lanes had
+  made more than 3 commits (seen twice in an install; the workaround was
+  `ADP_DISPATCH_STALE_OK=1`). The latch is now released on `SessionEnd` by a new
+  `session-end-latch.{sh,mjs}` hook, wired in both `settings.json` and
+  `settings.node.json`; `stop-cleanup` keeps worktree pruning and wire sync only.
+  The gate itself is unchanged: every new session is still checked.
+- `verify-hooks.{sh,mjs}` now check that the SessionEnd hook releases the latch;
+  `uninstall.*` removes the new hook.
+
+### Upgrading
+
+`init --upgrade` replaces the hook scripts, but `settings.json` is user-owned and
+is not edited. The installer prints a NOTE when the ADP hooks are wired without a
+`SessionEnd` entry: copy that block from `.claude/settings.json` (bash) or
+`.claude/settings.node.json` (Node). Without it the gate still runs once per
+session id; the latch files just stay in the temp dir.
+
 ## [1.1.7] — 2026-10-10 (hooks fail visible, bounds script, pathspec rule, review v0.3)
 
 ### Added

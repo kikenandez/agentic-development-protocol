@@ -79,7 +79,7 @@ do_rm ".adp"
 do_rm ".agentic-protocol"
 do_rm ".github/workflows/adp-checks.yml"
 # hooks (bash + optional Node port) + native agents
-for h in git-hygiene dispatch-freshness post-commit-orphan-check stop-cleanup; do
+for h in git-hygiene dispatch-freshness post-commit-orphan-check stop-cleanup session-end-latch; do
   do_rm ".claude/hooks/$h.sh"; do_rm ".claude/hooks/$h.mjs"
 done
 do_rm ".claude/settings.node.json"
