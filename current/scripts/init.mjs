@@ -156,6 +156,13 @@ if (isCC) {
       console.log('        .claude/settings.node.json (or settings.json for bash) so each new session');
       console.log('        re-checks Dispatch freshness. Without it the gate still runs once per session.');
     }
+    // Pre-1.1.9 wiring matched Bash only, so git writes through MCP tools skipped
+    // the hygiene hooks without a word. Same rule: point, don't edit.
+    if (now.includes('git-hygiene') && !now.includes('mcp-git-guard')) {
+      console.log('  NOTE: settings.json has no mcp-git-guard hook. Add the PreToolUse "mcp__.*" block');
+      console.log('        from .claude/settings.node.json (or settings.json for bash). Without it a');
+      console.log('        commit made through an MCP git tool skips the §6.4 hooks and nothing says so.');
+    }
   }
 }
 function readJson(p) { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return null; } }

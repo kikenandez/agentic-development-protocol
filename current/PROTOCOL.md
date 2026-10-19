@@ -271,9 +271,10 @@ These are non-negotiable for any team running ≥2 sessions in parallel.
 - `PreToolUse` (Bash matcher): blocks `git add -A` / `git add .` / `git commit -a` with exit code 2 and a stderr message the model sees as feedback.
 - `PreToolUse` (Bash matcher on `git commit`): runs `git status --short` and injects the result as `additionalContext` so the model sees what's actually staged before the commit fires, and notes when the commit carries no pathspec (rule 1, pathspec form).
 - `PostToolUse` (Bash matcher on `git commit`): runs `git branch --contains <hash>` and warns if empty.
+- `PreToolUse` (`mcp__.*` matcher, tooling 1.1.9): when an MCP tool name looks like a git write (`commit`, or `git` with `add` / `reset` / `checkout` / `push`), answers `ask` with the reason that the rules above do not run on that call (§8.3).
 - `Stop`: cleans orphan worktrees (the source-repo `~/.claude/hooks/cleanup-orphan-worktree-agents.sh` reference implementation).
 
-**Critical limitation.** Hooks operate at the tool-call boundary and cannot protect themselves — Edit/Write tools can modify `.claude/settings.json` or the hook scripts. Hooks are *process discipline*, not algorithmic constraint. For hard isolation, combine with OS-level file permissions or container boundaries.
+**Critical limitation.** Hooks operate at the tool-call boundary and cannot protect themselves — Edit/Write tools can modify `.claude/settings.json` or the hook scripts. They also see only the tools their matcher names: the hygiene hooks match `Bash`, so **MCP tools** (any server that writes files, runs commands or talks to git) sit outside them. The `mcp__.*` guard asks on git-write names; it cannot see what any other MCP tool does. Hooks are *process discipline*, not algorithmic constraint. For hard isolation, combine with OS-level file permissions or container boundaries — a git pre-commit hook, for example, holds whatever tool made the commit.
 
 **Hooks fail visible, never silent.** A hook whose dependency is missing (jq for the bash twins) must say so in the model's context — an `ask` on git commands for the hygiene gate, a context line for the freshness gate and the orphan check — rather than exit 0 and let the session believe it is enforced. An enforcement you cannot see fail is an enforcement you do not have (§15.1). *(Tooling 1.1.7; before it the bash hooks silently no-op'd without jq — a limit the README documented and no review had graded as a defect.)*
 
@@ -589,12 +590,14 @@ Different roles get different MCP servers wired in. Suggested defaults:
 
 | Role | MCP servers |
 |---|---|
-| Architect | git, Linear / project tracker, filesystem (read-only on code, write on docs/) |
-| Developer | git, filesystem (own lane), test runner |
-| Designer | git, filesystem (own lane), Playwright / visual e2e |
+| Architect | git (read), Linear / project tracker, filesystem (read-only on code, write on docs/) |
+| Developer | git (read), filesystem (own lane), test runner |
+| Designer | git (read), filesystem (own lane), Playwright / visual e2e |
 | Reviewer | git (read), context-indexing (read) — diff-focused, minimal scope creep |
 
-Watch-out: MCP tool definitions themselves consume tokens in the listing (~100-500 tokens per tool). A 10-server MCP setup with 4 tools each costs ~10-20K tokens just to list the tools. Be selective.
+**git over MCP is read-only: status, diff, log, show.** Writes (add, commit, reset, checkout, push) go through the Bash tool, where the §6.4 hooks are. The shipped hooks match `Bash`; a commit made through an MCP git tool never reaches them, so the five rules and the orphan check do not run, and a typical MCP `git_commit` takes the whole index with no pathspec form, so it cannot express rule 1 anyway. Since tooling 1.1.9 a `PreToolUse` hook on `mcp__.*` (`mcp-git-guard`) answers `ask` with this reason when an MCP tool name looks like a git write. It names the gap; it does not close it. *(Tooling 1.1.9 defect fix: earlier text put a read-write `git` server in every role.)*
+
+Watch-out: on hosts without deferred tool loading, MCP tool definitions themselves consume tokens in the listing (~100-500 tokens per tool). A 10-server MCP setup with 4 tools each costs ~10-20K tokens just to list the tools. Be selective. Claude Code defers schemas by default (tool search: only names are listed up front), unless `ENABLE_TOOL_SEARCH=false`, an older model, or a non-first-party `ANTHROPIC_BASE_URL` turns it off. To check what your install actually pays, run `/context` in a Claude Code session and read the MCP tools line.
 
 ### 8.4 Mapping to Anthropic's three-agent harness
 

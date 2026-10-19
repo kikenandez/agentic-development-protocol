@@ -18,6 +18,7 @@ const GH = join(HOOKS, 'git-hygiene.mjs');
 const DF = join(HOOKS, 'dispatch-freshness.mjs');
 const PO = join(HOOKS, 'post-commit-orphan-check.mjs');
 const SE = join(HOOKS, 'session-end-latch.mjs');
+const MG = join(HOOKS, 'mcp-git-guard.mjs');
 
 if (!existsSync(GH)) {
   console.error(`Error: ${GH} not found. Install with --host=claude-code (Node hooks ship there).`);
@@ -58,6 +59,20 @@ checkGH("exact-path 'git add' passes (no rule)",  'git add api/main.py',        
 checkGH("commit MSG mentioning 'git add -A' OK",  "git commit -m 'doc: why git add -A bad'", 'allow');
 checkGH("non-git command is ignored",             'ls -la',                                  'none');
 
+if (existsSync(MG)) {
+  console.log('\nmcp-git-guard.mjs (git writes through MCP tools skip the Bash hooks):');
+  const checkMG = (label, name, expected) => {
+    const got = runHook(MG, { tool_name: name })?.hookSpecificOutput?.permissionDecision || 'none';
+    got === expected ? ok(label) : bad(label, expected, got);
+  };
+  checkMG("MCP 'git_commit' ASKS",          'mcp__git__git_commit',     'ask');
+  checkMG("MCP 'git_add' ASKS",             'mcp__git__git_add',        'ask');
+  checkMG("MCP 'push_files' (GitHub) ASKS", 'mcp__github__push_files',  'ask');
+  checkMG("MCP 'git_status' (read) passes", 'mcp__git__git_status',     'none');
+  checkMG('non-git MCP tool is ignored',    'mcp__linear__add_comment', 'none');
+} else {
+  console.log('\nmcp-git-guard.mjs: SKIP  not installed (pre-1.1.9)');
+}
 if (existsSync(DF)) {
   console.log('\ndispatch-freshness.mjs (freshness gate):');
   const r = runHook(DF, { session_id: `verify-${process.pid}` });
@@ -83,7 +98,8 @@ console.log('');
 if (fail === 0) {
   console.log(`==> ALL ${pass} checks passed. The Node hook chain works (no jq needed).`);
   console.log("    Final step: in a live Claude Code session, try 'git add -A' to confirm");
-  console.log('    host wiring (settings.json points at the .mjs hooks).');
+  console.log('    host wiring (settings.json points at the .mjs hooks). If a git MCP');
+  console.log('    server is wired, also call its commit tool once and confirm it ASKS.');
   process.exit(0);
 } else {
   console.log(`==> ${fail} check(s) FAILED, ${pass} passed.`);

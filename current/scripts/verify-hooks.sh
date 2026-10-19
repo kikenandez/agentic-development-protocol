@@ -57,6 +57,25 @@ check_gh "commit MSG mentioning 'git add -A' OK"  "git commit -m 'doc: why git a
 check_gh "non-git command is ignored"             "ls -la"                                  none
 
 echo ""
+echo "mcp-git-guard.sh (git writes through MCP tools skip the Bash hooks):"
+if [ -f "$HOOKS/mcp-git-guard.sh" ]; then
+  mg_decision() { # $1 = MCP tool name -> prints ask|none|<other>
+    local out
+    out="$(printf '{"tool_name":%s}' "$(jq -Rn --arg c "$1" '$c')" | bash "$HOOKS/mcp-git-guard.sh" 2>/dev/null)"
+    [ -z "$out" ] && { echo "none"; return; }
+    printf '%s' "$out" | jq -r '.hookSpecificOutput.permissionDecision // "none"' 2>/dev/null || echo none
+  }
+  check_mg() { local got; got="$(mg_decision "$2")"; [ "$got" = "$3" ] && ok "$1" || bad "$1" "$3" "$got"; }
+  check_mg "MCP 'git_commit' ASKS"                 "mcp__git__git_commit"      ask
+  check_mg "MCP 'git_add' ASKS"                    "mcp__git__git_add"         ask
+  check_mg "MCP 'push_files' (GitHub) ASKS"        "mcp__github__push_files"   ask
+  check_mg "MCP 'git_status' (read) passes"        "mcp__git__git_status"      none
+  check_mg "non-git MCP tool is ignored"           "mcp__linear__add_comment"  none
+else
+  echo "  SKIP  not installed (pre-1.1.9)"
+fi
+
+echo ""
 echo "dispatch-freshness.sh (freshness gate):"
 if [ -f "$TARGET/docs/tasks/current.md" ]; then
   touch "$TARGET/docs/tasks/current.md"   # make it fresh for the test
@@ -92,7 +111,8 @@ echo ""
 if [ "$FAIL" -eq 0 ]; then
   echo "==> ALL $PASS checks passed. The script+jq+bash chain works."
   echo "    Final step: in a live Claude Code session, try 'git add -A' to confirm"
-  echo "    host wiring (settings.json) actually invokes these hooks."
+  echo "    host wiring (settings.json) actually invokes these hooks. If a git MCP"
+  echo "    server is wired, also call its commit tool once and confirm it ASKS."
   exit 0
 else
   echo "==> $FAIL check(s) FAILED, $PASS passed. Enforcement is not reliable yet."

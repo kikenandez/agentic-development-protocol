@@ -19,6 +19,45 @@ Rule of thumb: if it changes `PROTOCOL.md`, it's a minor (1.2). If it changes th
 installer/template/docs, it's a patch (1.1.x). Pure doc tweaks can ride along
 without their own bump.
 
+## [1.1.9] — unreleased (git writes through MCP tools no longer skip the hooks silently)
+
+### Fixed
+
+- **§8.3 recommended an MCP route around the git hooks.** The role table put a
+  `git` MCP server in every role, but the shipped `PreToolUse`/`PostToolUse` hooks
+  match `Bash` only. A commit made through an MCP tool (the reference server's
+  `git_add` / `git_commit`) never reached `git-hygiene` or the orphan check, and
+  nothing said so: the 1.1.7 failure shape (*a missing control must say so*) by a
+  different door. Found by the MCP scan of 2026-10-20 (`proposals/ADP-1.2-candidates.md`).
+  - New `mcp-git-guard.{sh,mjs}` hook, wired on `PreToolUse` matcher `mcp__.*` in
+    both `settings.json` and `settings.node.json`. When the tool name has a
+    `commit` word, or contains `git` with an `add` / `reset` / `checkout` / `push`
+    word, it answers `ask` with the reason and the Bash route. It never denies.
+    Read-only tools (`git_status`, `git_diff`, `git_log`, `git_show`) and non-git
+    MCP tools pass untouched. Without jq the bash twin reads the tool name with a
+    plain bash match and says jq is missing; the Node twin asks on internal error.
+    Kill switch shared with git-hygiene (`ADP_GIT_HOOK_DISABLE=1`).
+  - `PROTOCOL.md` §8.3: `git` is read-only in every role (status, diff, log,
+    show); writes go through Bash. §6.4: the hook list names the new guard, and
+    the critical limitation names MCP tools as outside the `Bash` matcher. These
+    are defect corrections to existing text, not a new rule; the spec stays 1.1.
+- **§8.3 listing-cost watch-out was host-dependent.** Scoped to hosts without
+  deferred tool loading (Claude Code defers schemas by default since tool search
+  shipped), with a one-line `/context` check.
+- `verify-hooks.{sh,mjs}` check the guard (ask on `git_commit` / `git_add` /
+  `push_files`, pass on `git_status` and non-git tools); new
+  `scripts/test_mcp_git_guard.py` (both twins, no-jq path, settings wiring).
+  `uninstall.*` removes the hook.
+
+### Upgrading
+
+`init --upgrade` adds the hook scripts, but `settings.json` is user-owned and is
+not edited. The installer prints a NOTE when the ADP hooks are wired without
+`mcp-git-guard`: copy the `PreToolUse` block with matcher `"mcp__.*"` from
+`.claude/settings.json` (bash) or `.claude/settings.node.json` (Node). Then, if a
+git MCP server is wired, call its commit tool once and confirm it asks (§11.1
+step 6).
+
 ## [1.1.8] — 2026-10-12 (freshness latch on SessionEnd, fresh-install Dispatch date)
 
 ### Fixed

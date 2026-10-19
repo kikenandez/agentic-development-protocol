@@ -295,6 +295,13 @@ if [ "$HOST" = "claude-code" ]; then
       echo "        .claude/settings.json (bash) or settings.node.json (Node) so each new session"
       echo "        re-checks Dispatch freshness. Without it the gate still runs once per session."
     fi
+    # Pre-1.1.9 wiring matched Bash only, so git writes through MCP tools skipped
+    # the hygiene hooks without a word. Same rule: point, don't edit.
+    if grep -q 'git-hygiene' "$SETTINGS" 2>/dev/null && ! grep -q 'mcp-git-guard' "$SETTINGS" 2>/dev/null; then
+      echo "  NOTE: settings.json has no mcp-git-guard hook. Add the PreToolUse \"mcp__.*\" block"
+      echo "        from .claude/settings.json (bash) or settings.node.json (Node). Without it a"
+      echo "        commit made through an MCP git tool skips the §6.4 hooks and nothing says so."
+    fi
   fi
 fi
 

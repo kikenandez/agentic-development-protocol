@@ -361,6 +361,8 @@ confirm the hook fires (§11.1 step 6). The bypass reaches beyond git: any MCP
 server that writes files or runs commands sits outside the `Bash` matcher, and
 §6.4's critical limitation (hooks are discipline, not a sandbox) should name MCP
 tools explicitly.
+**Status: fix applied in tooling 1.1.9 (unreleased)** — §8.3/§6.4 text,
+`mcp-git-guard.{sh,mjs}`, `verify-hooks`, `test_mcp_git_guard.py`; see CHANGELOG.
 
 **Correction — the §8.3 listing-cost watch-out is host-dependent now.** §8.3 says
 MCP tool definitions cost ~100–500 tokens per tool, paid every session. On Claude

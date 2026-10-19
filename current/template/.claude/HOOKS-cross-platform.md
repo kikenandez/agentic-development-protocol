@@ -9,7 +9,8 @@ ADP ships two interchangeable hook implementations. Pick one; don't run both.
 | Best for | macOS / Linux | **Windows**, or any host where bash/jq aren't guaranteed |
 
 Both enforce identical rules (§6.4 commit hygiene, §6.2 dispatch freshness,
-§6.4 rule 3 orphan check, §8.2 stop cleanup, SessionEnd latch release). The
+§6.4 rule 3 orphan check, §8.2 stop cleanup, SessionEnd latch release, and
+the `mcp__.*` guard that asks before a git write through an MCP tool). The
 Node versions additionally **fail safe** (ASK on internal error) instead of
 silently allowing, and keep their session latch in the OS temp dir.
 
