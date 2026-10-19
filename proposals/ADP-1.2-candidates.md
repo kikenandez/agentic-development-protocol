@@ -283,6 +283,43 @@ rules — protocolreview step 6):**
    in the retro template (§7), with **no fixed N**: how many supervised runs did the
    automation have, and what did its last deviation change? Earns a number only if
    an install logs an ESCAPED miss from an un-run-in automation.
+5. **Graph-backed codebase index** *(added 2026-10-19; graphify or equivalent —
+   a local tree-sitter knowledge graph exposed through a skill, hooks and ~10 MCP
+   tools such as `query_graph`, `shortest_path`, `god_nodes`).* **Delta:** an
+   alternative implementation of §7.3 for repos `generate_map.py` cannot read
+   (it is Python-only; the spec already names ast-grep + FTS5 as the non-Python
+   route, so this is a second named option, not a new pattern). Two optional feeds
+   ride on it, each only if the first measures well: `god_nodes` as a *candidate
+   source* for §10.4 hotspot rows (a row still needs n=2 and a human-verified seam;
+   centrality is a lead, not a hotspot), and graph queries in the Reviewer's
+   "context-indexing (read)" slot (§8.3). **Costs, stated up front:** (a) MCP
+   tool-listing tokens — at §8.3's own estimate (~100–500 tokens per tool) ~10 tools
+   is roughly 1–5K tokens, paid every session whether or not a query is made, so the
+   saving has to clear that standing cost first; (b) hook interplay — its PreToolUse hooks
+   would sit beside ADP's own, and which one wins is exactly what the *plugin-aware
+   precedence* candidate (#4 above) asks the install to write down; installing it
+   without that host table is the failure shape that candidate describes; (c) a
+   non-stdlib dependency (`uv tool install graphifyy`), against an ADP tooling line
+   that is stdlib-only; (d) the vendor's ~71.5x token-saving figure is
+   **self-reported** and measured on the vendor's corpus — it is a reason to run
+   the pilot, not a number ADP carries. **Bounded pilot (n=0, one install, never a
+   rule):** pick one non-Python (or mixed) install and ~10 tasks of ordinary size.
+   Run them in two arms on the same task kinds: the install's current route
+   (`generate_map.py` where it applies, else ast-grep) versus the graph. Record per
+   task **tokens consumed** and **files opened** (from the harness transcript —
+   `scripts/adp_metrics.py` does not derive either today: it reads cycle time,
+   rework, check-catch and miss trend, so those four run as the *guard*, and the
+   two new counts are logged by hand in the Result block until a second use earns
+   a script). Count the MCP listing overhead inside the graph arm's tokens, not
+   beside them. **Prune if** any of: graph-arm median tokens-per-task is not lower
+   than the baseline arm *after* the listing overhead; files-opened does not fall;
+   rework rate or check-catch count worsens in the graph arm (a navigation aid that
+   makes Check miss more is a net loss whatever it saves); or hook precedence has to
+   be resolved by hand more than once. A mixed result (fewer files, same tokens)
+   is recorded as such and does not graduate. Honest scope: ten tasks on one install
+   cannot separate the tool from the task mix, and a measurement run by the
+   install's own harness is self-reported — this narrows the question, it does not
+   answer it.
 
 **Rejected in the same scan, with reasons:** an auto-commit snapshot of the whole
 tree on every `Stop` (bypasses the PreToolUse hook entirely and contradicts §6.4
@@ -293,6 +330,118 @@ on the parsed command, with a test suite behind the parser — and the parser wa
 bypassed too until it normalised quoting like the shell); per-session model and
 effort advice (harness setting; §5.3's perishability note already says the names
 rot fastest).
+
+## MCP scan (2026-10-20; n=0 by install)
+
+A scan of open-source MCP servers currently suggested for Claude Code (the
+`modelcontextprotocol/servers` reference set, community code-intelligence and
+coordination servers, vendor plugins), read against §8.3 and the shipped hooks.
+No install was involved, so **nothing below advances an n-counter**. It found one
+defect in the spec, one stale cost figure, and two bounded pilots.
+
+**Defect — §8.3 recommends an MCP route around the git hooks.** The §8.3 role table
+puts a `git` MCP server in every role. But the shipped PreToolUse and PostToolUse
+hooks match `"Bash"` only (`template/.claude/settings.json` and
+`settings.node.json` both). A commit made through an MCP tool (the reference git
+server exposes `git_add` / `git_commit`, for example) never reaches
+`git-hygiene` or `post-commit-orphan-check`: the five §6.4 rules do not run, the
+orphan check does not run, and nothing says so. That is the failure shape tooling
+1.1.7 fixed for missing jq (*a missing control must say so*), arriving by a
+different door. The reference server's `git_commit` also commits the index and has
+no pathspec form, so it cannot express §6.4 rule 1 at all. A recommendation in the
+spec is the cheapest way to open this door, so this is a defect, not a candidate.
+**Fix direction (for the next tooling pass, not applied here):** (a) drop `git`
+from the §8.3 table, or mark it read-only (status, diff, log, show) and say that
+writes go through Bash, where the hooks are; (b) add a PreToolUse hook on
+`mcp__.*` tool names that matches git-write tools (`commit`, `add`, `reset`,
+`checkout`, `push` in the tool name) and answers `ask` with the reason. It must
+not deny silently (the plugin-aware-precedence failure shape, #4). (c) add the
+case to `verify-hooks`: deliberately commit through an MCP git tool once and
+confirm the hook fires (§11.1 step 6). The bypass reaches beyond git: any MCP
+server that writes files or runs commands sits outside the `Bash` matcher, and
+§6.4's critical limitation (hooks are discipline, not a sandbox) should name MCP
+tools explicitly.
+
+**Correction — the §8.3 listing-cost watch-out is host-dependent now.** §8.3 says
+MCP tool definitions cost ~100–500 tokens per tool, paid every session. On Claude
+Code that has not been the default since tool search shipped as the default
+(anthropics/claude-code#12836, closed as shipped 2026-03-11): only tool *names*
+are sent up front, and full schemas load on demand. `ENABLE_TOOL_SEARCH=false`
+restores the old behaviour, and `auto:N` defers only above N% of context. It still
+loads everything up front on older models, on a non-first-party
+`ANTHROPIC_BASE_URL`, and on hosts other than Claude Code. That covers ADP's
+prose-only and other-model installs, so the watch-out is still true there.
+**Fix direction:** keep the sentence, scope it ("on hosts without deferred tool
+loading…"), and add one line on how to check (`/context` on Claude Code). The same
+correction applies to cost (a) of import-scan candidate #5 (graph-backed index):
+on a Claude Code install with tool search on, the standing cost is the names plus
+the search tool's own overhead, not 1–5K tokens. The pilot design is unchanged.
+It already counts the listing overhead inside the graph arm, which is the right
+way to measure it whatever the host does.
+
+**New candidates at n=0 (bounded pilots, never rules):**
+
+6. **Dynamic file reservations (MCP Agent Mail or equivalent).** *Delta:* the lane
+   table in `process.md` §4 is static. Two sessions in the same lane, or a task that
+   crosses lanes, have no machine-visible claim on files. Agent Mail
+   (`Dicklesworthstone/mcp_agent_mail`) offers advisory, TTL-bound reservations on
+   paths and globs (`file_reservation_paths`, `release_file_reservations`). Each one
+   is written as a JSON artifact in git, stale leases are released automatically,
+   and an **optional pre-commit guard blocks a commit that touches another agent's
+   exclusive reservation**. That guard is a git hook, so it holds whatever tool
+   made the commit. That closes, for this one rule, the door the defect above
+   opens. **Pilot only the reservations.** The messaging half (inbox, threads,
+   acks) is a second coordination channel beside the Dispatch. It contradicts
+   "Dispatch is the handoff, not chat" (§8.4) and the single-source rule (#5), so
+   the pilot leaves it unused. **Costs:** a non-stdlib dependency (Python package
+   plus a local server), against the stdlib-only tooling line. Another set of MCP
+   tools. A pre-commit hook beside ADP's own, which needs the host table from #4.
+   And advisory leases add ceremony, the pruning cause in this pilot's history.
+   **Bounded pilot:** one install that already runs ≥2 implementing sessions in
+   parallel, over ~2 weeks of normal work. Log every reservation conflict the guard
+   raises, every commit collision or orphan that still happens, and every lease
+   that had to be cleared by hand. **Prune if** no conflict is caught that the
+   static lanes would have missed. Also prune if a lease blocks legitimate work
+   more than once, or if sessions skip reserving (an unused control is ceremony).
+   Honest scope: a solo operator running one implementing session at a time has
+   nothing for this to catch. The pilot needs real parallelism or it measures
+   nothing.
+
+7. **Mechanical blast radius for the CHECK (code-review-graph or equivalent).**
+   *Delta:* graduate-candidate #3 (two-verdict CHECK) asks the checker for a
+   blast-radius verdict, which today comes from reading the diff.
+   `tirth8205/code-review-graph` builds a local tree-sitter graph (SQLite, many
+   languages) and answers "what callers, dependents and tests does this change
+   reach". It does so as an MCP tool (`get_impact_radius_tool`) and also as a plain
+   CLI (`code-review-graph detect-changes --brief --base main`). **Pilot through the
+   CLI, not the MCP server.** That keeps it out of the tool listing and the hook
+   precedence question, and makes it a script the checker runs, not a tool the
+   implementer leans on. Do not install its PreToolUse hooks during the pilot. They
+   steer Grep and Glob toward graph queries, which would confound the measurement
+   and sit beside ADP's hooks. **Bounded pilot:** ~10 CHECKs on one install,
+   non-Python or mixed preferred. The checker writes the blast-radius verdict
+   first, then runs the CLI and records what it added: affected files or tests not
+   named in the verdict, and whether any turned out to matter (a failing or missing
+   test, a caller needing change). **Prune if** across the run the CLI names nothing
+   the checker missed that mattered, or if its false leads cost more check time
+   than they save. *Overlap:* this also implements import-scan candidate #5's index.
+   If both pilots run on one install, use one graph tool for both and report the two
+   measurements separately. #5 measures navigation tokens. This one measures
+   check-catch. The vendor's token-saving figures are self-reported and are not
+   carried. Honest scope: ten checks cannot tell a tool effect from an easy batch.
+   A catch counts only when the issue was confirmed, not merely flagged.
+
+**Considered and not entered:** a project-tracker MCP in the architect row of §8.3
+(Linear and the like) would be a second task store beside `docs/tasks/current.md`,
+and two stores always diverge (#5). The §8.3 row should say "read-only, if any". The
+reference *Memory* server (a knowledge graph) would be a second memory beside the
+`memory/` layer, for the same reason. The reference *Sequential Thinking* server is
+superseded by native model thinking (§5.3 already treats such settings as harness
+matters). Multi-model review servers (PAL / zen) were weighed as an implementation
+of import-scan candidate #1 (blind second route). A second model reading the same
+artifact is a second *reader* on the same route, not an independent route, so it
+does not meet #1's bar. It could still serve as an outside reviewer, but that is
+§8.3's Reviewer slot, not a new candidate.
 
 ## Promotion gate
 

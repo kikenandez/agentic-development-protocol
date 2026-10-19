@@ -49,6 +49,18 @@ the gate blocked the architect mid-session (seen twice). The latch now releases 
 `SessionEnd`; a fresh install's Dispatch is also stamped with the install time. No
 spec change; no counter advanced.
 
+**Status 2026-10-19.** One n=0 candidate recorded (graph-backed codebase index, as
+an alternative to §7.3 for non-Python repos, with a bounded pilot design). No counter
+advanced; spec and tooling unchanged.
+
+**Status 2026-10-20.** An MCP scan found one defect in the spec. §8.3 recommends a
+git MCP server, but the shipped hooks match only `Bash`, so a commit made through an
+MCP tool skips the §6.4 rules without saying so. The fix direction is recorded for
+the next tooling pass. The scan also scoped §8.3's tool-listing cost to hosts
+without deferred tool loading, and added two n=0 pilots (file reservations;
+mechanical blast radius for the CHECK). No counter advanced; spec and tooling
+unchanged.
+
 One candidate was already **pruned** in the pilot for being unadopted ceremony —
 evidence the review mechanism isn't self-preserving.
 
