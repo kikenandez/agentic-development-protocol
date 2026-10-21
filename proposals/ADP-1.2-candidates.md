@@ -495,6 +495,22 @@ technical report and third-party reviews. Nothing was installed or run, so
    guard against a wrong change made inside the lane, which is still the CHECK's
    job.
 
+   **Boundary trial run 2026-10-21 (n=0; `evidence/openshell_lane_trial_2026-10-21.md`):**
+   one designer-lane sandbox ran on a throwaway clone, with shell commands only and
+   no agent session. Intel macOS is not on the support matrix. It ran through the
+   gateway container plus the Linux CLI in a container.
+   - Writes outside the lane were refused on every route tried (shell, python,
+     node, git work tree). Edits to hooks and `settings.json` were refused, and
+     so were egress and credential reads.
+   - **V3 got through with `.git` writable.** Git plumbing committed an
+     outside-lane file without touching the work tree, and `.git/hooks` was
+     writable. A path-level sandbox cannot scope commits.
+   - With `.git` read-only, all four violations were refused. The cost is that
+     commits move out of the sandbox, onto a pathspec commit where the hooks run.
+
+   **Design amended:** `.git` is read-only inside a lane sandbox, and the commit
+   gate sits outside it. The two-week pilot is still unrun.
+
 **Considered and not entered — Nemotron 3 as a model tier.** ADP is a protocol, not a
 model consumer, and §5.3 recommends tiers, not vendors.
 
