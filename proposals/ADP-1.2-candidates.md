@@ -445,6 +445,79 @@ artifact is a second *reader* on the same route, not an independent route, so it
 does not meet #1's bar. It could still serve as an outside reviewer, but that is
 §8.3's Reviewer slot, not a new candidate.
 
+## Runtime scan (2026-10-21; n=0 by install)
+
+A desk read of NVIDIA OpenShell (Apache-2.0, v0.1.5 at the time of reading) and the
+Nemotron 3 open-weight models, set against §6.4's critical limitation, §8.5 and
+§5.3. Sources were the vendor docs, the support matrix, the Nemotron 3 Super
+technical report and third-party reviews. Nothing was installed or run, so
+**nothing below advances an n-counter**.
+
+8. **Lane-scoped sandbox per role (OpenShell or equivalent).** *Delta:* §8.5 already
+   says that hard guarantees need "a container/devcontainer with a filesystem mount
+   limited to its lane", and that the lane table "doubles as the mount spec". It
+   names no implementation and no test. §6.4's critical limitation is the gap this
+   fills: hooks run inside the agent's own tool loop, so an Edit can rewrite them,
+   and any tool outside their matcher (the MCP door the defect above closed for git
+   only) goes around them. OpenShell enforces outside the agent workload:
+   - **Files:** Landlock path policy, fixed when the sandbox is created.
+   - **Commands:** seccomp, and an unprivileged process identity.
+   - **Network:** an egress allow-list that can be reloaded while the sandbox runs.
+   - **Credentials:** the gateway resolves placeholder credentials only at
+     authorised endpoints, so the agent never holds a live key.
+
+   Policies are YAML that can be version-controlled. Per the vendor docs, Claude
+   Code, Codex, OpenCode and Copilot CLI run inside it unmodified, which keeps ADP
+   host-agnostic. The mapping: one sandbox per role session. Its worktree (the
+   worktree-per-session candidate) is writable only on the role's lane paths from
+   `process.md` §4. The rest of the tree, **including `.claude/` and the hook
+   scripts**, is read-only. Egress is limited to the model endpoint and the git
+   remote. That turns three §6.4 "discipline" items into enforced ones: lane
+   edits, self-editing hooks, and writes through tools the matcher cannot see.
+   **Costs:** Docker Desktop (or Podman or a microVM) on every operator machine.
+   On macOS the kernel controls run inside Docker's Linux VM. Also a young project
+   (weekly stable releases, interfaces marked Experimental can change in a patch),
+   a gateway process to run, and one more policy file per role that drifts if the
+   lane table changes without it. The pilot generates the policy from the lane
+   table rather than hand-writing it, or drift is guaranteed.
+   **Bounded pilot:** one install, one role first (reviewer, then developer), for
+   ~2 weeks of normal work. Before any normal work, run §11.1 step 6 inside the
+   sandbox: edit a file outside the lane, edit a hook script, commit through an MCP
+   git tool, and read a credential file. Each must be refused **by the sandbox**,
+   with the hooks disabled for the test so they don't take the credit. Then log
+   every legitimate action the policy blocked, the setup time per session, and
+   every policy edit forced by a lane-table change. **Prune if** any of the four
+   violations gets through. Also prune if legitimate work is blocked more than
+   twice a week, or if per-session setup costs more than a few minutes. *Overlap:*
+   this holds candidate #6's reservations as hard boundaries for static lanes
+   only. Dynamic, cross-lane claims stay #6's job. Honest scope: this guards
+   against an agent's mistake, a prompt injection or a hook bypass. It does not
+   guard against a wrong change made inside the lane, which is still the CHECK's
+   job.
+
+**Considered and not entered — Nemotron 3 as a model tier.** ADP is a protocol, not a
+model consumer, and §5.3 recommends tiers, not vendors.
+
+| Model | Size (total / active) | Published result |
+|---|---|---|
+| Nemotron 3 Nano | 30B | — |
+| Nemotron 3 Super | 120B / 12B | SWE-bench Verified ~60% (OpenHands), about 6 points behind Qwen3.5-122B |
+| Nemotron 3 Ultra | ~550B / ~55B | ~48 on the Artificial Analysis index |
+
+All three are open-weight under the NVIDIA Open Model License, which allows
+commercial use. None is near the frontier tier ADP's roles run on today. The one
+real use is a data-sovereign install: a non-Claude host, a local model in the
+cheap "locate" slot (§5.3, locate-don't-extract), and OpenShell's privacy router
+keeping code on the machine. That is a deployment option for a client who needs
+it, not a protocol delta. It enters only if such an install exists and measures the
+locate tier's miss rate.
+
+**Correction — the §5.3 tier table is stale.** It names Opus/Sonnet/Haiku 4.x and
+the 2026-06 prices. The current generation is the Claude 5 family. Its own
+perishability note asks for re-verification. **Fix direction (next tooling pass,
+not applied here):** re-verify names and prices, along with the pinned `model:`
+strings in `template/.claude/agents/*.md`.
+
 ## Promotion gate
 
 Each graduate-candidate enters `PROTOCOL.md` as **1.2** only when a **second
