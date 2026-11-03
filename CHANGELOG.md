@@ -49,6 +49,16 @@ without their own bump.
   `scripts/test_mcp_git_guard.py` (both twins, no-jq path, settings wiring).
   `uninstall.*` removes the hook.
 
+### Docs
+
+- **`protocolreview.md` → v0.4**, folding a third run on the source install
+  ([run 3 report](evidence/protocolreview_run3_webapp_2026-11-02.md)): step 1 checks that
+  the miss ledger was kept before reading it (31 days, 0 entries — an empty window is a
+  finding about the instrument); step 3d re-runs a delegated count with the architect's
+  own patterns before any disposal; step 4 measures every size cap in bytes as well as
+  lines (a line-only guard missed a dispatch file at 1.72× its byte cap) and shrinks an
+  obligation ledger of re-homed residue per task. Still n=1 by install.
+
 ### Upgrading
 
 `init --upgrade` adds the hook scripts, but `settings.json` is user-owned and is

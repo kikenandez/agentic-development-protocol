@@ -1,12 +1,15 @@
 # The Protocol Review — a recurring improvement ritual for ADP installs
 
-**Status:** TOOL, v0.3 — extracted 2026-08-20 from a full review run on the n=1
+**Status:** TOOL, v0.4 — extracted 2026-08-20 from a full review run on the n=1
 production install (the web application); revised 2026-10-02 after a second run on the
 same install ([run 2 report](evidence/protocolreview_run2_webapp_2026-10-02.md)); v0.3
 on 2026-10-10 folds an **import scan** (step 5) over material from outside ADP installs,
-with an adversarial recheck of the scan itself before anything was edited. Two
-executions, **one install** — still n=1 by install. Every step carries a receipt;
-v0.2 / v0.3 additions are marked. Portable by design; graded honestly where it is not.
+with an adversarial recheck of the scan itself before anything was edited; v0.4 on
+2026-11-03 folds a third run on the same install
+([run 3 report](evidence/protocolreview_run3_webapp_2026-11-02.md)): check the ledger was
+kept, measure caps in bytes, re-run a subagent's counts. Three executions, **one
+install** — still n=1 by install. Every step carries a receipt; v0.2–v0.4 additions are
+marked. Portable by design; graded honestly where it is not.
 **Companion docs:** `proposals/ADP-1.2-candidates.md` (what a review can graduate),
 `proposals/semantic-verification-checklist.md` (a review import that reached n=2).
 
@@ -57,6 +60,18 @@ reports stopped without delivery, owner rulings per day.
 > recorded as shipped wrong code. The owner rejected "≈ 0" as exceeding the
 > evidence; the effort row read 17 of 358 lane entries falsified at gate 1,
 > 4 stopped-without-delivery reports, 72 owner rulings in 8 days.
+
+*(v0.4)* **Check that the ledger was KEPT before reading it.** Count the window's
+ledger entries and the handovers that carry an own-misses line. An empty or near-empty
+ledger is a finding about the instrument, not a quality result: reconstruct the
+window's misses from handovers, task files and commits, state that the step ran on
+a reconstruction, and fix the instrument (for example, an `own-misses:` line the
+handover template cannot omit).
+
+> Receipt (run 3, 2026-11-02): 0 ledger entries in 31 days and no handover with an
+> own-misses line. The reconstruction found ≥ 1 defect family ESCAPED to production
+> (a parser read «45 millones» as 45; hotfixed 2 days later) and ≥ 3 caught before
+> it. The effort row is what kept the step from coming back empty.
 
 ### 2. Family analysis — fix at the ACT, not the artifact
 
@@ -146,6 +161,15 @@ their name or shape, not only by number; a number-only grep under-reads.
 > by number → 2 retired, 1 generalized, 1 kept with a recorded reason. The
 > by-name under-count was found in the same pass.
 
+*(v0.4)* **A subagent's count carries its patterns, and is re-run before a disposal.**
+When a delegated counter (often a cheap-model subagent) produces the citation
+counts, its report lists the exact patterns it grepped; before any rule is retired
+on that count, the architect re-runs the count with patterns of their own (number,
+name, shape). A counter that picks its own patterns can under-read, and a disposal
+must not rest on that.
+> Receipt (run 3): the counter's name patterns were too narrow; the four flags held
+> after a re-count (3 retired, 1 kept because its shape carried the window's escape).
+
 ### 4. Memory-layer integrity — short-term and long-term
 
 **Short-term (the dispatch file):** measure raw size against the target; find
@@ -173,6 +197,22 @@ files — generators that skip DONE rows silently hide half-closed ones.
 *(v0.3)* **Size targets are a script, not a reminder:** `scripts/adp_bounds.py`
 fails on the mechanical trigger (current.md lines / bytes, memory read layer) and
 warns on the Dispatch block, so a hook or CI step can run this step's first pass.
+*(v0.4)* **Measure every size cap in bytes as well as lines.** A line-only guard
+misses growth in line length (generated tables, long single-line rows), and a guard
+keyed to a heading shape goes silent after a layout change. Run `adp_bounds.py` (bytes
+and lines) rather than an install's own line counter, and treat a guard that cannot
+fire on the current layout as broken.
+> Receipt (run 3): the dispatch file reached 112,831 bytes (1.72× the 64 KB cap) at
+> 433 lines with no warning; the install's hook counted lines only, and its `### T`
+> check could not fire after a layout change. `adp_bounds.py` would have caught it.
+
+*(v0.4)* **Shrink a ledger of re-homed residue by task, not by archiving.** An
+obligation ledger that has absorbed residue from closed tasks will not shrink by
+archive passes: very little of it is provably discharged. What worked: move the
+residue of closed tasks older than 30 days into each task's own archive record, and
+leave one index line per task behind.
+> Receipt (run 3): a 2,381-line ledger against a 1,500 target; an audit found only 31
+> provably discharged lines. Residue moved per task: 2,381 → 1,371 lines.
 *(v0.3)* **Supersession scan.** For every decision retired in the window (a task
 CANCELED or DEFERRED, a plan replaced, a rule retired), is the pointer present —
 `Supersedes:` on the task or plan, the retirement ledger for a rule? A retired
@@ -261,12 +301,13 @@ next session boots from:
 
 ## Outputs checklist (what a completed review leaves behind)
 
+- [ ] Ledger confirmed kept for the window (or the step marked as run on a reconstruction, and the instrument fixed)
 - [ ] Rework-rate stated for the window (escaped vs caught, separately), with an effort row beside it
 - [ ] Each recurring family matched to a fix AT THE ACT (or an explicit decision not to)
 - [ ] Rules home verified reachable; count derivable or ledger-reconstruction filed
 - [ ] Cross-layer contradiction scan run, plugins included; each hit fixed or precedence-claused
-- [ ] Citation-decay pass run, by number AND name; every flagged rule disposed (retire/subsume/keep-with-reason)
-- [ ] Every standing memory file at its target size; status census run; long-term guards green; index regenerated in order
+- [ ] Citation-decay pass run, by number AND name; every flagged rule disposed (retire/subsume/keep-with-reason); a delegated count re-run with the architect's own patterns before any disposal
+- [ ] Every standing memory file at its target size, in bytes and lines; status census run; long-term guards green; index regenerated in order
 - [ ] External imports verified at source and graded with receipts; adopted ones ratified under subsume-or-don't; the scan itself rechecked adversarially before any edit
 - [ ] Every hook's dependency verified present, or its absence shown to fail visible (`test_git_hygiene.py` no-jq cases green)
 - [ ] `scripts/adp_bounds.py` green on the install; every retired decision in the window carries its supersession pointer
@@ -282,8 +323,8 @@ next session boots from:
 - If review outputs go **unadopted** (ratified mechanisms uncited by the next
   review), prune the step that produced them — the same un-adopted-ceremony bar
   that pruned the effort-band candidate in the 1.2 pilot.
-- n=1 caveat, stated per ADP's own promotion rule: this tool has run **twice,
-  on one install** (2026-08-20 and 2026-10-02). A second run on the same install
+- n=1 caveat, stated per ADP's own promotion rule: this tool has run **three
+  times, on one install** (2026-08-20, 2026-10-02 and 2026-11-02). Another run on the same install
   sharpens the steps; it does not graduate them. A second *install* running it
   and reporting what fired — especially what did NOT — is what graduates it.
   Open an install report either way.
