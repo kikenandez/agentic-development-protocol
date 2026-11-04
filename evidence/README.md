@@ -27,6 +27,7 @@ Full excerpts can be provided to a reviewer or editor on request, under the usua
 | `claim_receipts_embedded_cpp_2026-08-17.md` | The cross-install run. Near-empty by design — see below |
 | `history_analysis_webapp_2026-08-19.md` | Source-control analysis: corpus composition, churn distribution, commit cadence, convention adherence |
 | `protocolreview_run2_webapp_2026-10-02.md` | Install report for the second run of [`protocolreview.md`](../protocolreview.md) on the source install: which steps fired, with receipts, and candidate v0.2 changes |
+| `cloud_thread_trial_2026-11-04.md` | ADP from a hosted cloud thread (no hooks), on a throwaway repo, four runs: only a root `CLAUDE.md` reaches the thread; CI blocked a bad PR, admin included; a one-click "Fix CI" relabelled the commit `process:` and got past Hook integrity. n=0 |
 | `protocolreview_run3_webapp_2026-11-02.md` | Install report for the third run on the source install: an unkept miss ledger, a line-only size guard that missed a 2× byte overrun, a delegated counter that under-read; the changes folded as v0.4 |
 
 ## The runs these came from

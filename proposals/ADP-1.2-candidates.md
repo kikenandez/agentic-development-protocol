@@ -534,6 +534,39 @@ perishability note asks for re-verification. **Fix direction (next tooling pass,
 not applied here):** re-verify names and prices, along with the pinned `model:`
 strings in `template/.claude/agents/*.md`.
 
+## Cloud-thread trial (2026-11-04; n=0 by install)
+
+One throwaway public repo ran ADP 1.1.8 from a hosted cloud thread, which loads
+instruction files but runs no hooks. There were four runs. Evidence:
+`evidence/cloud_thread_trial_2026-11-04.md`. **Nothing below advances an n-counter.**
+
+9. **Root instruction file for hosted runners.** *Delta:* the installer ships a
+   root `CLAUDE.md` (and an `AGENTS.md` twin for other hosts). It names the default
+   role, the lane, the "never edit the task file" rule and the PR-only rule, and
+   points at `docs/prompts/`. Today an unmodified install reaches a hosted thread
+   with no rules at all, because only `memory/CLAUDE.md` ships. With a 10-line root
+   file, the trial's developer run was clean: lane respected, report in the PR,
+   4/4 checks green. *Cost:* one more file the architect keeps in step with
+   `process.md` §4. **Prune if** a second install's hosted threads stay inside the
+   rules without it.
+
+10. **Hook integrity by identity, not by label.** *Delta:* §6.4's Hook integrity
+    check passes any change to enforcement files when a commit says `process:`, and
+    the agent writes the commit labels. In the trial, the host's one-click "Fix
+    CI" relabelled the commit, turned all four checks green, and left the PR
+    mergeable with the git-hygiene hook removed (closed unmerged). Replace or back
+    it with `CODEOWNERS` on `.claude/**`, `.github/workflows/**` and `scripts/`,
+    plus a required code-owner review. That only separates the agent from the
+    approver if **agent threads push from their own identity**: a bot account or a
+    GitHub App, not the operator's account, which is what the trial's host used.
+    Until then, §6.4 should say the label check catches accidents, not intent, and
+    that a PR whose CI fix touched enforcement files is reviewed as a diff, never
+    merged on green. **Bounded pilot:** one install, agent identity separated,
+    CODEOWNERS on. Re-run run D, which must stay blocked, and count how often the
+    owner review blocks legitimate `process:` work. **Prune if** the separate
+    identity can't be set up on the hosts in use. In that case, keep only the
+    §6.4 wording fix.
+
 ## Promotion gate
 
 Each graduate-candidate enters `PROTOCOL.md` as **1.2** only when a **second
