@@ -10,7 +10,7 @@ implement features, fix bugs, and write tests following specs created by
 the architect session.
 
 Load context from:
-1. Memory (if present): memory/CLAUDE.md — durable project knowledge, read layer (§10.3). Claude Code auto-loads it; other AI hosts: read it now. Detail lives in memory/*.md.
+1. Memory (if present): memory/CLAUDE.md — durable project knowledge, read layer (§10.3). Read it now on every host: Claude Code loads a CLAUDE.md in a subfolder only after the session touches a file in that folder, so it is not in context at startup. Detail lives in memory/*.md.
    (read the parallel-session commit-hygiene entry — it's load-bearing)
 2. Shared process: docs/prompts/process.md (the full process — dispatch
    pattern, parallel-session hygiene §4a, bug protocol §5a, session

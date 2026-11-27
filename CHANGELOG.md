@@ -22,6 +22,7 @@ without their own bump.
 ## [1.1.9] — unreleased (git writes through MCP tools no longer skip the hooks silently)
 
 ### Fixed
+- Claude Code facts in `PROTOCOL.md`, `README.md` and the role prompts brought in line with the current docs (checked 2026-11-27): settings and plugin hooks DO fire on subagent tool calls; subagents can nest up to three layers (`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`); model order is per-call → frontmatter → `CLAUDE_CODE_SUBAGENT_MODEL` → parent; project subagents are meant to be version-controlled; subagents can still invoke skills via the Skill tool; and `memory/CLAUDE.md` is NOT auto-loaded at startup (subfolder CLAUDE.md files load on demand), so every role prompt now says to read it on every host. Host facts only: no rule changed, no spec bump.
 
 - **§8.3 recommended an MCP route around the git hooks.** The role table put a
   `git` MCP server in every role, but the shipped `PreToolUse`/`PostToolUse` hooks
