@@ -175,7 +175,7 @@ The 2026 cost ratios on the Claude API: Haiku $1 / $5 per 1M tokens (input/outpu
 | Reviewer | Haiku 4.x | Mechanical verification; full code reasoning not required |
 | Analyst | Sonnet 4.x | One-shot kickoff |
 
-**The subagent gotcha.** When roles ship as Claude Code subagents (§8.1), the `model:` resolution order is env var > frontmatter > inherit from parent. The default is *inherit*, not Haiku. If you do not pin `model:` explicitly in each subagent's frontmatter, your cheap reviewer silently runs on Opus and your bill explodes. Always pin.
+**The subagent gotcha.** When roles ship as Claude Code subagents (§8.1), the `model:` resolution order is the per-invocation `model` parameter > the `model:` frontmatter field > the `CLAUDE_CODE_SUBAGENT_MODEL` env var > the parent's model. With no `model:` field and no env var, the subagent *inherits* the parent's model, not Haiku. If you do not pin `model:` explicitly in each subagent's frontmatter, your cheap reviewer silently runs on Opus and your bill explodes. Always pin.
 
 **Locate, don't extract (the direction of delegation).** A cheap tier may *locate* — which file, which symbol, which line anchor — but a value, count or list it hands back is a **pointer, not a fact**: the tier that owns the verdict re-reads it at the source. A summarising small model drops lines without saying so, and a count from a filtered tool is the S6 wrong-cardinality class (`proposals/semantic-verification-checklist.md`). This line indexes two existing checks rather than adding one: the research-report rule in the protocol review (step 5: *verify each claimed import at the source*) and S6. *(Added 2026-10: §5.3 said which tier, never what a tier may return.)*
 
@@ -278,7 +278,7 @@ These are non-negotiable for any team running ≥2 sessions in parallel.
 
 **Hooks fail visible, never silent.** A hook whose dependency is missing (jq for the bash twins) must say so in the model's context — an `ask` on git commands for the hygiene gate, a context line for the freshness gate and the orphan check — rather than exit 0 and let the session believe it is enforced. An enforcement you cannot see fail is an enforcement you do not have (§15.1). *(Tooling 1.1.7; before it the bash hooks silently no-op'd without jq — a limit the README documented and no review had graded as a defect.)*
 
-**Sub-finding for parallel work.** Subagents run in isolated context — parent-session hooks do NOT fire on subagent tool calls. Each subagent needs its hooks declared in its own frontmatter or in `.claude/settings.json` scoped to the subagent name.
+**Sub-finding for parallel work.** Hooks on tool events from settings files (`.claude/settings.json`, `settings.local.json`, user and managed settings) and from plugins also fire on subagent tool calls, so the hygiene hooks above cover subagents too. Hooks declared in a subagent's frontmatter fire only while that subagent is active, and only once the folder is trusted. *(Corrected 2026-11-27: spec 1.1 said parent-session hooks do not fire inside subagents; current docs say they do. Re-run the deliberate-violation test inside a subagent to confirm on your host.)* *(Checked against the Claude Code docs, code.claude.com/docs/en/sub-agents and /hooks, 2026-11-27.)*
 
 #### Worktree-per-session — the root-cause fix (new in 1.2-candidate)
 
@@ -525,7 +525,7 @@ For non-Python repos, [ast-grep + FTS5 SQLite index](https://github.com/ast-grep
 
 ### 7.4 Subagent ↔ skill explicit declaration
 
-**The gotcha.** Subagents (§8.1) run in fresh context windows and do **NOT** inherit the parent's skills automatically. If the architect has `codebase-index` loaded and dispatches a developer subagent, the developer starts blind unless `codebase-index` is declared in the subagent's frontmatter:
+**The gotcha.** Subagents (§8.1) run in fresh context windows and do **not** get the parent's loaded skill content. They can still find and invoke project, user and plugin skills through the Skill tool, but only if they think to. To have `codebase-index` in the developer subagent's context from its first turn, preload it in the subagent's frontmatter:
 
 ```yaml
 ---
@@ -561,10 +561,12 @@ skills: codebase-index, operational-quick-ref
 Important constraints (verified against the official docs):
 
 - `tools:` is an allow-list; `disallowedTools:` is a deny-list, applied first.
-- `model:` resolution is env var → frontmatter → inherit from parent. Default is *inherit*. Pin explicitly per §5.3.
-- Subagents **cannot spawn other subagents** — no nested delegation. The parent chains them.
+- `model:` resolution is per-invocation parameter → `model:` frontmatter → `CLAUDE_CODE_SUBAGENT_MODEL` → parent's model. Default is *inherit*. Pin explicitly per §5.3.
+- Subagents **can spawn subagents of their own**, up to three layers below the main conversation by default. `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1` turns nesting off; leaving `Agent` out of a subagent's `tools:` stops that one subagent from spawning. ADP's roles do not need nesting: set depth 1 if you want the parent to chain them, as spec 1.1 assumed.
 - Project-level (`.claude/agents/`) overrides user-level (`~/.claude/agents/`).
-- Hooks declared in the subagent's frontmatter fire only when that subagent is active. Parent hooks do NOT intercept subagent tool calls (subagents run in isolated context).
+- Hooks declared in the subagent's frontmatter fire only when that subagent is active. Hooks on tool events from settings files, managed settings and plugins also apply inside subagents.
+
+*(Checked against the Claude Code docs, code.claude.com/docs/en/sub-agents and /hooks, 2026-11-27.)*
 
 The `init.sh --host=claude-code` flag materializes the subagent files alongside the prose prompts. Without the flag, only prose ships. Both forms point at the same `process.md`, so the protocol stays single-source-of-truth.
 
